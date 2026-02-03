@@ -44,9 +44,13 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -73,6 +77,7 @@ import org.l2jmobius.clientcryptor.crypt.DatCrypter;
 import org.l2jmobius.config.ConfigDebug;
 import org.l2jmobius.config.ConfigWindow;
 import org.l2jmobius.forms.JPopupTextArea;
+import org.l2jmobius.ui.ItemCreatorPanel;
 import org.l2jmobius.util.Util;
 import org.l2jmobius.xml.CryptVersionParser;
 import org.l2jmobius.xml.DescriptorParser;
@@ -179,6 +184,15 @@ public class L2ClientDat extends JFrame
 				System.exit(0);
 			}
 		});
+		
+		// Menu Bar
+		JMenuBar menuBar = new JMenuBar();
+		JMenu toolsMenu = new JMenu("Tools");
+		JMenuItem itemForgeItem = new JMenuItem("Item Forge");
+		itemForgeItem.addActionListener(e -> openItemCreator());
+		toolsMenu.add(itemForgeItem);
+		menuBar.add(toolsMenu);
+		setJMenuBar(menuBar);
 		
 		final JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new BorderLayout());
@@ -312,6 +326,15 @@ public class L2ClientDat extends JFrame
 		}
 		setVisible(true);
 		toFront();
+	}
+	
+	private void openItemCreator()
+	{
+		JDialog dialog = new JDialog(this, "Item Forge", true);
+		dialog.setContentPane(new ItemCreatorPanel());
+		dialog.setSize(800, 600);
+		dialog.setLocationRelativeTo(this);
+		dialog.setVisible(true);
 	}
 	
 	public JPopupTextArea getTextPaneMain()
