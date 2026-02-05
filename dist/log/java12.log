@@ -1,0 +1,28 @@
+2026.02.04 14:11:54,630	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 14:11:54,728	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.04 14:11:54,767	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 14:11:55,101	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.04 14:11:55,102	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 14:11:55,769	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.04 14:12:07,617	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 4 sec
+2026.02.04 14:12:11,510	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 14:12:11,512	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.04 14:12:11,544	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 14:12:11,710	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.04 14:12:11,711	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 14:12:12,004	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.04 14:12:20,594	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 14:12:20,595	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
+2026.02.04 14:12:20,658	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 14:12:20,754	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
+2026.02.04 14:12:20,754	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 14:12:21,033	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.04 14:12:30,632	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
+2026.02.04 14:12:36,830	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 14:12:36,831	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
+2026.02.04 14:12:36,848	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 14:12:36,957	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
+2026.02.04 14:12:36,958	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 14:12:36,964	INFO	69	org.l2jmobius.L2ClientDat	Error while parsing variable NAME[effB] TYPE[UNICODE] in file NAME[weapongrp.dat]! Parsed data: 	effB=
+2026.02.04 14:12:36,971	INFO	69	org.l2jmobius.L2ClientDat	Unpacked not full 20882/5030807 diff: 5009912
+2026.02.04 14:12:36,999	INFO	69	org.l2jmobius.L2ClientDat	Completed.

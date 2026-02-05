@@ -1,0 +1,14 @@
+2026.02.05 09:09:55,715	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 09:09:55,807	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 09:09:55,825	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 09:09:56,128	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 09:09:56,130	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 09:09:56,788	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 09:10:25,462	INFO	52	org.l2jmobius.forge.ItemForgeController	File itemname-e.dat is not open. Performing background load.
+2026.02.05 09:10:25,463	INFO	52	org.l2jmobius.forge.ItemForgeController	TXT file missing. Attempting to unpack itemname-e.dat...
+2026.02.05 09:10:26,014	INFO	52	org.l2jmobius.forge.ItemForgeController	Successfully unpacked itemname-e.dat
+2026.02.05 09:10:26,167	INFO	52	org.l2jmobius.forge.ItemForgeController	Updated itemname-e.txt
+2026.02.05 09:10:26,167	SEVERE	52	org.l2jmobius.forge.ItemForgeController	Cannot pack itemname-e.txt: Main Frame reference is missing.
+2026.02.05 09:10:26,168	INFO	52	org.l2jmobius.forge.ItemForgeController	File weapongrp.dat is not open. Performing background load.
+2026.02.05 09:10:26,263	INFO	52	org.l2jmobius.forge.ItemForgeController	Updated weapongrp.txt
+2026.02.05 09:10:26,263	SEVERE	52	org.l2jmobius.forge.ItemForgeController	Cannot pack weapongrp.txt: Main Frame reference is missing.

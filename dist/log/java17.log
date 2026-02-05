@@ -1,0 +1,15 @@
+2026.02.04 09:26:09,448	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 09:26:09,513	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
+2026.02.04 09:26:09,536	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 09:26:09,732	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
+2026.02.04 09:26:09,733	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 09:26:10,375	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.04 09:27:39,782	INFO	70	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 2 sec
+2026.02.04 09:28:03,271	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 09:28:03,273	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
+2026.02.04 09:28:03,285	INFO	70	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 09:28:03,377	INFO	70	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
+2026.02.04 09:28:03,377	INFO	70	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 09:28:03,384	INFO	70	org.l2jmobius.L2ClientDat	Error while parsing variable NAME[effB] TYPE[UNICODE] in file NAME[weapongrp.dat]! Parsed data: 	effB=
+2026.02.04 09:28:03,389	INFO	70	org.l2jmobius.L2ClientDat	Unpacked not full 20882/5030807 diff: 5009912
+2026.02.04 09:28:03,414	INFO	70	org.l2jmobius.L2ClientDat	Completed.

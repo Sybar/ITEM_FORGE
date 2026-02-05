@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -12,8 +13,11 @@ import java.util.logging.Logger;
 import org.l2jmobius.L2ClientDat;
 import org.l2jmobius.actions.OpenDat;
 import org.l2jmobius.actions.SaveDat;
+import org.l2jmobius.clientcryptor.crypt.DatCrypter;
 import org.l2jmobius.config.ConfigWindow;
 import org.l2jmobius.forms.JPopupTextArea;
+import org.l2jmobius.xml.DescriptorParser;
+import org.l2jmobius.xml.DescriptorWriter;
 
 public class ItemForgeController {
     private static final Logger LOGGER = Logger.getLogger(ItemForgeController.class.getName());
@@ -133,9 +137,25 @@ public class ItemForgeController {
             }
         }
 
-        if (isOpen) {
-            LOGGER.info("File " + fileName + " is currently open. Editing in memory.");
-            backgroundLoadAndEdit(systemFolder, fileName, item, isItemName);
+        if (isOpen && _mainFrame != null) {
+            LOGGER.info("File " + fileName + " is currently open. Updating UI directly.");
+            // Retrieve current text from UI
+            String content = _mainFrame.getTextPaneMain().getText();
+            // Split into lines (handle both \r\n and \n)
+            List<String> lines = new ArrayList<>(Arrays.asList(content.split("\\r?\\n")));
+            
+            // Generate updated content
+            List<String> newLines = generateUpdatedContent(lines, item, isItemName);
+            
+            if (newLines != null) {
+                // Join back to string
+                String newContent = String.join(System.lineSeparator(), newLines);
+                
+                // Update UI
+                _mainFrame.setEditorText(newContent);
+                LOGGER.info("Updated Main Window UI for " + fileName);
+            }
+            
         } else {
             LOGGER.info("File " + fileName + " is not open. Performing background load.");
             backgroundLoadAndEdit(systemFolder, fileName, item, isItemName);
@@ -185,116 +205,183 @@ public class ItemForgeController {
         
         try {
             List<String> lines = Files.readAllLines(txtFile.toPath(), StandardCharsets.UTF_8);
-            List<String> newLines = new ArrayList<>();
             
-            if (isItemName) {
-                // Update itemname-e.txt with strict formatting
-                String format = "item_name_begin\tid=%d\tname=[%s]\tadditionalname=[%s]\tdescription=[%s]\tpopup=-1\tsupercnt0=0\tsetid_1={}\tset_bonus_desc=[]\tsupercnt1=0\tset_extra_id={}\tset_extra_desc=[]\tunknown={0;0;0;0;0;0;0;0;0}\tspecial_enchant_amount=0\tspecial_enchant_desc=[]\tcolor=1\titem_name_end";
-                String newItemLine = String.format(format, 
-                        item.getId(), 
-                        item.getName(), 
-                        item.getAdditionalName() != null ? item.getAdditionalName() : "", 
-                        item.getDescription() != null ? item.getDescription() : "");
-                
-                for (String line : lines) {
-                    // Check Condition: if (line.contains("id=" + item.getId() + "\t"))
-                    if (line.contains("id=" + item.getId() + "\t")) {
-                        continue; // Skip existing line to replace it
-                    }
-                    newLines.add(line);
-                }
-                newLines.add(newItemLine);
-                
-            } else {
-                // Update group file
-                String templateId = item.getVisualTemplate();
-                String templateLine = null;
-                
-                // 1. Convert the target ID to a clean String
-                String searchId = "object_id=" + String.valueOf(templateId).trim();
-                System.out.println("DEBUG: Looking for strict match: '" + searchId + "' at Index 2");
-                int rowIndex = 0;
-
-                for (String line : lines) {
-                    if (line == null || line.trim().isEmpty()) {
-                        rowIndex++;
-                        continue;
-                    }
-
-                    String[] tokens = line.split("\t");
-                    
-                    // 2. Check Index 2
-                    if (tokens.length > 2) {
-                        String cellString = tokens[2].trim();
-                        
-                        // 3. Debug the first row
-                        if (rowIndex == 0) {
-                            System.out.println("FULL ROW DUMP: " + line);
-                            for (int i = 0; i < tokens.length; i++) {
-                                System.out.println("Index " + i + ": " + tokens[i]);
-                            }
-                        }
-
-                        // 4. Compare Strings
-                        if (cellString.equals(searchId)) {
-                            templateLine = line;
-                            System.out.println("DEBUG: MATCH FOUND at row " + rowIndex);
-                            break;
-                        }
-                    }
-                    rowIndex++;
-                }
-                
-                if (templateLine != null) {
-                    String[] tokens = templateLine.split("\t");
-                    if (tokens.length > 18) {
-                        // 2. Cloning Logic (Setting the new ID)
-                        tokens[2] = "object_id=" + item.getId();
-                        
-                        // 3. Icon Logic (Updating Index 18)
-                        if (item.getIcon() != null && !item.getIcon().isEmpty()) {
-                            String oldIconVal = tokens[18];
-                            String newIconVal = oldIconVal.replaceFirst("icon\\.[\\w_]+", item.getIcon());
-                            tokens[18] = newIconVal;
-                        }
-                        
-                        String newLine = String.join("\t", tokens);
-                        
-                        // Append
-                        for (String line : lines) {
-                             // Check if ID exists to avoid duplicates (using the new ID format)
-                             String[] lineTokens = line.split("\t");
-                             if (lineTokens.length > 2 && lineTokens[2].trim().equals("object_id=" + item.getId())) {
-                                 continue;
-                             }
-                             newLines.add(line);
-                        }
-                        newLines.add(newLine);
-                    } else {
-                        LOGGER.severe("Template line found but has insufficient columns (" + tokens.length + "). Expected > 18.");
-                        newLines.addAll(lines);
-                    }
-                } else {
-                    LOGGER.severe("Template ID " + templateId + " not found, aborting save.");
-                    return;
-                }
-            }
+            // Use helper method to generate updated content
+            List<String> newLines = generateUpdatedContent(lines, item, isItemName);
             
-            Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
-            LOGGER.info("Updated " + txtFile.getName());
-            
-            // Auto-pack (Encrypt)
-            File datFile = new File(systemFolder, fileName);
-            if (_mainFrame != null) {
-                SaveDat task = new SaveDat(_mainFrame, datFile, ConfigWindow.CURRENT_CHRONICLE);
-                task.doInBackground(); // Execute synchronously
-                LOGGER.info("Compiled " + fileName);
+            if (newLines != null && !newLines.isEmpty()) {
+                Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
+                LOGGER.info("Updated " + txtFile.getName());
+                
+                // Auto-pack (Encrypt)
+                packFile(txtFile);
             }
             
         } catch (Exception e) {
             LOGGER.severe("Error processing file " + fileName + ": " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    
+    private void packFile(File txtFile) {
+        if (_mainFrame == null) {
+            LOGGER.severe("Cannot pack " + txtFile.getName() + ": Main Frame reference is missing.");
+            return;
+        }
+
+        File datFile = new File(txtFile.getParent(), txtFile.getName().replace(".txt", ".dat"));
+        LOGGER.info("Attempting to pack: " + txtFile.getName() + " -> " + datFile.getName());
+
+        try {
+            // 1. Get the appropriate encryptor
+            DatCrypter crypter = _mainFrame.getEncryptor(datFile);
+            if (crypter == null) {
+                LOGGER.severe("Encryption failed: No encryptor found for " + datFile.getName());
+                return;
+            }
+
+            // 2. Get Descriptor
+            String chronicle = ConfigWindow.CURRENT_CHRONICLE;
+            org.l2jmobius.xml.Descriptor desc = DescriptorParser.getInstance().findDescriptorForFile(chronicle, datFile.getName());
+            if (desc == null) {
+                LOGGER.severe("No descriptor found for " + datFile.getName() + " (" + chronicle + ")");
+                return;
+            }
+
+            // 3. Read Text
+            String text = new String(Files.readAllBytes(txtFile.toPath()), StandardCharsets.UTF_8);
+
+            // 4. Parse Data (Text -> Binary) using DescriptorWriter
+            // We need a dummy ActionTask for progress reporting
+            org.l2jmobius.actions.ActionTask dummyTask = new org.l2jmobius.actions.ActionTask(null) {
+                @Override public Void doInBackground() { return null; }
+                @Override protected void action() {}
+                @Override public void done() {}
+                @Override public void propertyChange(java.beans.PropertyChangeEvent evt) {}
+            };
+
+            byte[] binaryData = DescriptorWriter.parseData(dummyTask, 100.0, datFile, crypter, desc, text, true);
+
+            if (binaryData == null || binaryData.length == 0) {
+                LOGGER.severe("DescriptorWriter returned empty data for " + datFile.getName());
+                return;
+            }
+
+            // 5. Encrypt and Write
+            org.l2jmobius.clientcryptor.DatFile.encrypt(binaryData, datFile.getPath(), crypter);
+            LOGGER.info("Successfully packed " + datFile.getName() + " (" + binaryData.length + " bytes before encryption)");
+
+        } catch (Exception e) {
+            LOGGER.severe("Error packing file " + datFile.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private List<String> generateUpdatedContent(List<String> lines, ForgeItem item, boolean isItemName) {
+        List<String> newLines = new ArrayList<>();
+        
+        if (isItemName) {
+            // Update itemname-e.txt with strict formatting
+            String format = "item_name_begin\tid=%d\tname=[%s]\tadditionalname=[%s]\tdescription=[%s]\tpopup=-1\tsupercnt0=0\tsetid_1={}\tset_bonus_desc=[]\tsupercnt1=0\tset_extra_id={}\tset_extra_desc=[]\tunknown={0;0;0;0;0;0;0;0;0}\tspecial_enchant_amount=0\tspecial_enchant_desc=[]\tcolor=1\titem_name_end";
+            String newItemLine = String.format(format, 
+                    item.getId(), 
+                    item.getName(), 
+                    item.getAdditionalName() != null ? item.getAdditionalName() : "", 
+                    item.getDescription() != null ? item.getDescription() : "");
+            
+            for (String line : lines) {
+                // Check Condition: if (line.contains("id=" + item.getId() + "\t"))
+                if (line.contains("id=" + item.getId() + "\t")) {
+                    continue; // Skip existing line to replace it
+                }
+                newLines.add(line);
+            }
+            newLines.add(newItemLine);
+            
+        } else {
+            // Update group file
+            String templateId = item.getVisualTemplate();
+            String templateLine = null;
+            
+            // 1. Convert the target ID to a clean String
+            String searchId = "object_id=" + String.valueOf(templateId).trim();
+            System.out.println("DEBUG: Looking for strict match: '" + searchId + "' at Index 2");
+            int rowIndex = 0;
+
+            for (String line : lines) {
+                if (line == null || line.trim().isEmpty()) {
+                    rowIndex++;
+                    continue;
+                }
+
+                String[] tokens = line.split("\t", -1);
+                
+                // 2. Check Index 2
+                if (tokens.length > 2) {
+                    String cellString = tokens[2].trim();
+                    
+                    // 3. Debug the first row
+                    if (rowIndex == 0) {
+                        System.out.println("FULL ROW DUMP: " + line);
+                        for (int i = 0; i < tokens.length; i++) {
+                            System.out.println("Index " + i + ": " + tokens[i]);
+                        }
+                    }
+
+                    // 4. Compare Strings
+                    if (cellString.equals(searchId)) {
+                        templateLine = line;
+                        System.out.println("DEBUG: MATCH FOUND at row " + rowIndex);
+                        break;
+                    }
+                }
+                rowIndex++;
+            }
+            
+            if (templateLine != null) {
+                String[] tokens = templateLine.split("\t", -1);
+                
+                // FIX: If the line ends with a tab, split(-1) creates an extra empty token.
+                // We must remove it to match the descriptor structure.
+                if (tokens.length > 0 && tokens[tokens.length - 1].isEmpty()) {
+                    String[] trimmed = new String[tokens.length - 1];
+                    System.arraycopy(tokens, 0, trimmed, 0, tokens.length - 1);
+                    tokens = trimmed;
+                }
+
+                if (tokens.length > 18) {
+                    // 2. Cloning Logic (Setting the new ID)
+                    tokens[2] = "object_id=" + item.getId();
+                    
+                    // 3. Icon Logic (Updating Index 18)
+                    if (item.getIcon() != null && !item.getIcon().isEmpty()) {
+                        String oldIconVal = tokens[18];
+                        String newIconVal = oldIconVal.replaceFirst("icon\\.[\\w_]+", item.getIcon());
+                        tokens[18] = newIconVal;
+                    }
+                    
+                    String newLine = String.join("\t", tokens);
+                    
+                    // Append
+                    for (String line : lines) {
+                         // Check if ID exists to avoid duplicates (using the new ID format)
+                         String[] lineTokens = line.split("\t", -1);
+                         if (lineTokens.length > 2 && lineTokens[2].trim().equals("object_id=" + item.getId())) {
+                             continue;
+                         }
+                         newLines.add(line);
+                    }
+                    newLines.add(newLine);
+                } else {
+                    LOGGER.severe("Template line found but has insufficient columns (" + tokens.length + "). Expected > 18.");
+                    newLines.addAll(lines);
+                }
+            } else {
+                LOGGER.severe("Template ID " + templateId + " not found, aborting save.");
+                return null; // Return null to indicate failure
+            }
+        }
+        return newLines;
     }
 
     private String getGroupFileName(String type) {

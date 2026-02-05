@@ -94,21 +94,33 @@ public class ItemCreatorPanel extends JPanel {
         btnGenerate.setBackground(new Color(100, 200, 100)); // Light Green
         btnGenerate.addActionListener(e -> {
             try {
+                // 1. Get Data from Form
                 ForgeItem item = getFormData();
                 ItemForgeController controller = new ItemForgeController();
                 
-                // Generate Server XML
-                String serverXml = controller.generateServerXml(item);
-                System.out.println("Generated Server XML:\n" + serverXml);
-                
-                // Update Client Files
-                controller.updateClientFiles(item);
-                
-                JOptionPane.showMessageDialog(this, 
-                    "Item creation successful!\n\n" +
-                    "Server XML printed to console.\n" +
-                    "Client files updated in current directory.", 
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                // 2. CRITICAL FIX: Traverse up to find the Main Window (L2ClientDat)
+                java.awt.Window parent = javax.swing.SwingUtilities.getWindowAncestor(this);
+                org.l2jmobius.L2ClientDat mainFrame = null;
+
+                if (parent instanceof org.l2jmobius.L2ClientDat) {
+                    mainFrame = (org.l2jmobius.L2ClientDat) parent;
+                } else if (parent instanceof javax.swing.JDialog) {
+                    // If we are in a popup dialog, get its owner
+                    java.awt.Window owner = ((javax.swing.JDialog) parent).getOwner();
+                    if (owner instanceof org.l2jmobius.L2ClientDat) {
+                        mainFrame = (org.l2jmobius.L2ClientDat) owner;
+                    }
+                }
+
+                // 3. Pass the Main Frame to the Controller
+                if (mainFrame != null) {
+                    controller.setMainFrame(mainFrame);
+                    controller.createItem(item);
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Internal Error: Could not find Main Window context.\nPlease restart the tool.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                }
                     
             } catch (Exception ex) {
                 ex.printStackTrace();

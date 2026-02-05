@@ -1,0 +1,13 @@
+2026.02.04 15:00:41,455	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 15:00:41,529	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.04 15:00:41,561	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 15:00:41,835	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.04 15:00:41,836	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 15:00:42,493	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.04 15:00:50,862	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
+2026.02.04 15:00:55,592	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.04 15:00:55,593	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.04 15:00:55,618	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.04 15:00:55,779	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.04 15:00:55,780	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.04 15:00:56,050	INFO	69	org.l2jmobius.L2ClientDat	Completed.

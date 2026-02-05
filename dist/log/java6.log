@@ -1,0 +1,23 @@
+2026.02.05 08:51:31,198	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 08:51:31,280	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 08:51:31,302	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 08:51:31,599	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 08:51:31,600	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 08:51:32,239	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 08:51:42,274	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 4 sec
+2026.02.05 08:53:17,096	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 08:53:17,097	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
+2026.02.05 08:53:17,136	INFO	79	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 08:53:17,235	INFO	79	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
+2026.02.05 08:53:17,236	INFO	79	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 08:53:17,772	INFO	79	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 08:53:55,339	INFO	79	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 08:53:55,341	INFO	79	org.l2jmobius.L2ClientDat	Saved: F:\5_Other_Games\2_High_Five_Custom\system\weapongrp.txt
+2026.02.05 08:54:30,485	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 08:54:30,485	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 08:54:30,503	INFO	79	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 08:54:30,666	INFO	79	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 08:54:30,667	INFO	79	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 08:54:30,801	INFO	79	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 08:55:04,352	INFO	52	org.l2jmobius.forge.ItemForgeController	Processing itemname-e.dat (Full Save)...
+2026.02.05 08:55:04,932	SEVERE	52	org.l2jmobius.forge.ItemForgeController	Error processing itemname-e.dat: Cannot invoke "org.l2jmobius.L2ClientDat.setEditorText(String)" because "this._mainFrame" is null
