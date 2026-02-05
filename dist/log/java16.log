@@ -1,22 +1,8 @@
-2026.02.04 09:31:20,825	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 09:31:20,891	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.04 09:31:20,912	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 09:31:21,202	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.04 09:31:21,203	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 09:31:21,863	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 09:31:39,722	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.04 09:31:54,390	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 09:31:54,391	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 09:31:54,423	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 09:31:54,523	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 09:31:54,524	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 09:31:55,022	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 09:32:02,147	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.04 09:32:14,265	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 09:32:14,266	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 09:32:14,308	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 09:32:14,389	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 09:32:14,389	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 09:32:14,395	INFO	69	org.l2jmobius.L2ClientDat	Error while parsing variable NAME[effB] TYPE[UNICODE] in file NAME[weapongrp.dat]! Parsed data: 	effB=
-2026.02.04 09:32:14,400	INFO	69	org.l2jmobius.L2ClientDat	Unpacked not full 20882/5030807 diff: 5009912
-2026.02.04 09:32:14,425	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 13:41:06,949	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 13:41:07,012	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 13:41:07,036	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 13:41:07,321	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 13:41:07,322	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 13:41:07,931	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 13:41:17,559	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
+2026.02.05 13:41:19,717	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat

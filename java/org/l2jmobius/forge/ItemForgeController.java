@@ -1,395 +1,388 @@
 package org.l2jmobius.forge;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.l2jmobius.L2ClientDat;
 import org.l2jmobius.actions.OpenDat;
 import org.l2jmobius.actions.SaveDat;
-import org.l2jmobius.clientcryptor.crypt.DatCrypter;
 import org.l2jmobius.config.ConfigWindow;
-import org.l2jmobius.forms.JPopupTextArea;
-import org.l2jmobius.xml.DescriptorParser;
-import org.l2jmobius.xml.DescriptorWriter;
 
 public class ItemForgeController {
     private static final Logger LOGGER = Logger.getLogger(ItemForgeController.class.getName());
     private L2ClientDat _mainFrame;
 
-    public ItemForgeController() {
-    }
-    
     public void setMainFrame(L2ClientDat frame) {
         _mainFrame = frame;
     }
 
-    public void createItem(ForgeItem item) {
-        LOGGER.info("Starting item creation for ID: " + item.getId() + " Name: " + item.getName());
-        
-        String serverXml = generateServerXml(item);
-        System.out.println("Generated Server XML:\n" + serverXml);
-        
-        updateClientFiles(item);
-    }
+    // =============================================================================================
+    //  XML GENERATION
+    // =============================================================================================
 
-    /**
-     * Generates the Server-Side XML snippet compatible with L2J_Mobius High Five.
-     * Based on items.xsd structure.
-     */
     public String generateServerXml(ForgeItem item) {
         StringBuilder sb = new StringBuilder();
+        String type = item.getType();
 
-        // Header
-        sb.append(String.format("\t<item id=\"%d\" type=\"%s\" name=\"%s\">\n", item.getId(), item.getType(), item.getName()));
+        sb.append(String.format("<item id=\"%d\" name=\"%s\" type=\"%s\">\n",
+                item.getId(),
+                item.getName().replace("\"", "'"),
+                type));
 
-        // Core Sets
         appendSet(sb, "icon", item.getIcon());
-        appendSet(sb, "bodypart", item.getBodyPart());
-        appendSet(sb, "material", item.getMaterial());
-        appendSet(sb, "crystal_type", item.getCrystalType());
-        appendSet(sb, "weight", String.valueOf(item.getWeight()));
         appendSet(sb, "price", String.valueOf(item.getPrice()));
+        appendSet(sb, "weight", String.valueOf(item.getWeight()));
 
-        // Weapon Specifics (Shots)
-        if (item.getType() != null && item.getType().equalsIgnoreCase("Weapon")) {
+        if (item.getMaterial() != null && !item.getMaterial().isEmpty()) {
+            appendSet(sb, "material", item.getMaterial().toUpperCase());
+        }
+        if (item.getCrystalType() != null && !item.getCrystalType().equalsIgnoreCase("none")) {
+            appendSet(sb, "crystal_type", item.getCrystalType().toUpperCase());
+        }
+
+        if ("Weapon".equalsIgnoreCase(type)) {
+            appendSet(sb, "bodypart", "rhand");
             appendSet(sb, "soulshots", String.valueOf(item.getSoulshotCount()));
             appendSet(sb, "spiritshots", String.valueOf(item.getSpiritshotCount()));
-            if (item.isMagicWeapon()) {
-                appendSet(sb, "is_magic_weapon", "true");
-            }
-            if (item.getMpConsume() > 0) {
-                appendSet(sb, "mp_consume", String.valueOf(item.getMpConsume()));
-            }
-        } else if (item.getType() != null && item.getType().equalsIgnoreCase("EtcItem")) {
-            if (item.getEtcItemType() != null) {
-                appendSet(sb, "etcitem_type", item.getEtcItemType());
-            }
-            if (item.isStackable()) {
-                appendSet(sb, "is_stackable", "true");
-            }
-            if (item.isQuestItem()) {
-                appendSet(sb, "is_questitem", "true");
-            }
+            appendSet(sb, "mp_consume", String.valueOf(item.getMpConsume()));
+
+            sb.append("\t<set name=\"weapon_type\" val=\"SWORD\" />\n");
+            sb.append("\t<stats>\n");
+            sb.append("\t\t<set stat=\"pAtk\" val=\"10\" />\n");
+            sb.append("\t\t<set stat=\"mAtk\" val=\"10\" />\n");
+            sb.append("\t\t<set stat=\"rCrit\" val=\"4\" />\n");
+            sb.append("\t\t<set stat=\"pAtkSpd\" val=\"300\" />\n");
+            sb.append("\t</stats>\n");
+
+        } else if ("Armor".equalsIgnoreCase(type)) {
+            appendSet(sb, "bodypart", item.getBodyPart());
+            sb.append("\t<stats>\n");
+            sb.append("\t\t<set stat=\"pDef\" val=\"10\" />\n");
+            sb.append("\t</stats>\n");
+        } else {
+            appendSet(sb, "is_stackable", "true");
+            appendSet(sb, "handler", "ItemSkills");
         }
 
-        // Stats Block
-        if (!item.getStats().isEmpty() && !item.getType().equalsIgnoreCase("EtcItem")) {
-            sb.append("\t\t<stats>\n");
-            for (Map.Entry<String, Double> entry : item.getStats().entrySet()) {
-                sb.append(String.format("\t\t\t<set stat=\"%s\" val=\"%s\" />\n", entry.getKey(), String.valueOf(entry.getValue())));
-            }
-            sb.append("\t\t</stats>\n");
-        }
-
-        // Footer
-        sb.append("\t</item>");
+        sb.append("</item>");
         return sb.toString();
     }
 
     private void appendSet(StringBuilder sb, String name, String val) {
-        if (val != null && !val.isEmpty() && !val.equals("NONE")) {
-            sb.append(String.format("\t\t<set name=\"%s\" val=\"%s\" />\n", name, val));
+        if (val != null && !val.isEmpty() && !val.equals("0")) {
+            sb.append(String.format("\t<set name=\"%s\" val=\"%s\" />\n", name, val));
         }
     }
 
-    /**
-     * Updates the client DAT files with the new item.
-     * Handles background loading if the file is not currently open.
-     */
-    public void updateClientFiles(ForgeItem item) {
-        // 1. Get Context (System Folder)
+    // =============================================================================================
+    //  LOAD LOGIC
+    // =============================================================================================
+
+    public ForgeItem loadItem(int id) {
+        if (_mainFrame == null) return null;
         String currentFilePath = ConfigWindow.LAST_FILE_SELECTED;
-        if (currentFilePath == null || currentFilePath.isEmpty()) {
-            LOGGER.severe("No file selected context. Please open a DAT file first to establish the system folder.");
-            return;
-        }
+        if (currentFilePath == null) return null;
         File systemFolder = new File(currentFilePath).getParentFile();
-        if (systemFolder == null || !systemFolder.exists()) {
-            LOGGER.severe("Invalid system folder derived from: " + currentFilePath);
-            return;
-        }
 
-        // 2. Identify Targets
-        String itemNameFileName = "itemname-e.dat";
+        ForgeItem item = new ForgeItem();
+        item.setId(id);
+
+        if (!loadItemNameData(systemFolder, item)) return null;
+
+        if (!loadGroupData(systemFolder, "weapongrp.dat", item, "Weapon")) {
+            if (!loadGroupData(systemFolder, "armorgrp.dat", item, "Armor")) {
+                loadGroupData(systemFolder, "etcitemgrp.dat", item, "EtcItem");
+            }
+        }
+        return item;
+    }
+
+    private boolean loadItemNameData(File systemFolder, ForgeItem item) {
+        List<String> lines = readDatFile(systemFolder, "itemname-e.dat");
+        if (lines == null) return false;
+        String searchId = "id=" + item.getId() + "\t";
+        for (String line : lines) {
+            if (line.contains(searchId)) {
+                item.setName(extractTagValue(line, "name"));
+                item.setAdditionalName(extractTagValue(line, "additionalname"));
+                item.setDescription(extractTagValue(line, "description"));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean loadGroupData(File systemFolder, String fileName, ForgeItem item, String type) {
+        List<String> lines = readDatFile(systemFolder, fileName);
+        if (lines == null) return false;
+        String searchId = "object_id=" + item.getId();
+        for (String line : lines) {
+            String[] tokens = line.split("\t");
+            if (tokens.length > 2 && tokens[2].trim().equals(searchId)) {
+                item.setType(type);
+                item.setVisualTemplate(String.valueOf(item.getId()));
+                if (type.equals("Weapon")) parseWeaponStats(tokens, item);
+                else if (type.equals("Armor")) parseArmorStats(tokens, item);
+                else parseEtcItemStats(tokens, item);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void parseWeaponStats(String[] tokens, ForgeItem item) {
+        if (tokens.length > 18) item.setIcon(cleanStr(tokens[18]));
+        if (tokens.length > 20) item.setWeight(safeParseInt(tokens[20]));
+        if (tokens.length > 21) item.setMaterial(getMaterialName(safeParseInt(tokens[21])));
+        if (tokens.length > 23) item.setCrystalType(getCrystalName(safeParseInt(tokens[23])));
+        if (tokens.length > 32) item.setSoulshotCount(safeParseInt(tokens[32]));
+        if (tokens.length > 33) item.setSpiritshotCount(safeParseInt(tokens[33]));
+        if (tokens.length > 44) item.setMpConsume(safeParseInt(tokens[44]));
+        if (tokens.length > 4) item.setBodyPart("rhand");
+    }
+
+    private void parseArmorStats(String[] tokens, ForgeItem item) {
+        if (tokens.length > 4) item.setBodyPart(getBodyPartName(safeParseInt(tokens[4])));
+        if (tokens.length > 16) item.setWeight(safeParseInt(tokens[16]));
+        if (tokens.length > 17) item.setMaterial(getMaterialName(safeParseInt(tokens[17])));
+        if (tokens.length > 18) item.setCrystalType(getCrystalName(safeParseInt(tokens[18])));
+        for(String t : tokens) {
+            if (t.contains("icon")) {
+                String clean = cleanStr(t);
+                if(!clean.isEmpty() && !clean.equals("icon")) { item.setIcon(clean); break; }
+            }
+        }
+    }
+
+    private void parseEtcItemStats(String[] tokens, ForgeItem item) {
+        if (tokens.length > 5) item.setWeight(safeParseInt(tokens[5]));
+        if (tokens.length > 7) item.setMaterial(getMaterialName(safeParseInt(tokens[7])));
+        if (tokens.length > 8) item.setCrystalType(getCrystalName(safeParseInt(tokens[8])));
+        for(String t : tokens) {
+            if (t.contains("icon")) {
+                String clean = cleanStr(t);
+                if(!clean.isEmpty() && !clean.equals("icon")) { item.setIcon(clean); break; }
+            }
+        }
+    }
+
+    private String cleanStr(String val) {
+        if (val == null) return "";
+        val = val.replace("icon=", "");
+        val = val.replaceAll("[\\[\\]\\{\\}]", "");
+        if (val.contains(";")) {
+            val = val.split(";")[0];
+        }
+        return val.trim();
+    }
+
+    // --- CREATE / UPDATE FILES ---
+
+    public void createItem(ForgeItem item) {
+        if (_mainFrame == null) return;
+        updateClientFiles(item);
+    }
+
+    public void updateClientFiles(ForgeItem item) {
+        String currentFilePath = ConfigWindow.LAST_FILE_SELECTED;
+        if (currentFilePath == null) return;
+        File systemFolder = new File(currentFilePath).getParentFile();
+
+        boolean successName = processDatFile(systemFolder, "itemname-e.dat", item, true);
+        if (!successName) return;
+
         String groupFileName = getGroupFileName(item.getType());
+        boolean successGroup;
 
-        // 3. Process ItemName
-        processDatFile(systemFolder, itemNameFileName, item, true);
-
-        // 4. Process Group File (Visuals)
-        processDatFile(systemFolder, groupFileName, item, false);
-    }
-
-    private void processDatFile(File systemFolder, String fileName, ForgeItem item, boolean isItemName) {
-        // Check if this file is currently open in the main editor
-        boolean isOpen = false;
-        if (ConfigWindow.LAST_FILE_SELECTED != null) {
-            File openFile = new File(ConfigWindow.LAST_FILE_SELECTED);
-            if (openFile.getName().equalsIgnoreCase(fileName)) {
-                isOpen = true;
-            }
-        }
-
-        if (isOpen && _mainFrame != null) {
-            LOGGER.info("File " + fileName + " is currently open. Updating UI directly.");
-            // Retrieve current text from UI
-            String content = _mainFrame.getTextPaneMain().getText();
-            // Split into lines (handle both \r\n and \n)
-            List<String> lines = new ArrayList<>(Arrays.asList(content.split("\\r?\\n")));
-            
-            // Generate updated content
-            List<String> newLines = generateUpdatedContent(lines, item, isItemName);
-            
-            if (newLines != null) {
-                // Join back to string
-                String newContent = String.join(System.lineSeparator(), newLines);
-                
-                // Update UI
-                _mainFrame.setEditorText(newContent);
-                LOGGER.info("Updated Main Window UI for " + fileName);
-            }
-            
+        if ("Weapon".equalsIgnoreCase(item.getType()) || "Armor".equalsIgnoreCase(item.getType())) {
+            successGroup = exportTxtOnly(systemFolder, groupFileName, item);
+            if (successGroup) showMessage("Saved itemname-e.dat (Auto)\nExported " + groupFileName.replace(".dat", ".txt") + " (Manual Compile)");
         } else {
-            LOGGER.info("File " + fileName + " is not open. Performing background load.");
-            backgroundLoadAndEdit(systemFolder, fileName, item, isItemName);
+            successGroup = processDatFile(systemFolder, groupFileName, item, false);
+            if (successGroup) showMessage("Saved itemname-e.dat and " + groupFileName + " successfully.");
         }
     }
 
-    private void backgroundLoadAndEdit(File systemFolder, String fileName, ForgeItem item, boolean isItemName) {
+    // --- SMART READ LOGIC (Prioritizes TXT) ---
+    private List<String> readDatFile(File systemFolder, String fileName) {
         File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
-        
-        // Auto-unpack logic
-        if (!txtFile.exists()) {
-            File datFile = new File(systemFolder, fileName);
-            if (datFile.exists()) {
-                LOGGER.info("TXT file missing. Attempting to unpack " + fileName + "...");
-                try {
-                    // Create a dummy ActionTask that overrides methods to avoid NPEs
-                    org.l2jmobius.actions.ActionTask dummyTask = new org.l2jmobius.actions.ActionTask(null) {
-                        @Override
-                        public Void doInBackground() { return null; }
-                        @Override
-                        protected void action() {}
-                        @Override
-                        public void done() {} // Override to avoid calling _l2clientdat.onStopTask()
-                        @Override
-                        public void propertyChange(java.beans.PropertyChangeEvent evt) {} // Override to avoid calling _l2clientdat.onProgressTask()
-                    };
-                    
-                    String unpackedText = OpenDat.start(dummyTask, 100.0, ConfigWindow.CURRENT_CHRONICLE, datFile, true); // mass=true to avoid UI logs
-                    if (unpackedText != null && !unpackedText.isEmpty()) {
-                        Files.write(txtFile.toPath(), unpackedText.getBytes(StandardCharsets.UTF_8));
-                        LOGGER.info("Successfully unpacked " + fileName);
-                    } else {
-                        LOGGER.severe("Failed to unpack " + fileName);
-                        return;
-                    }
-                    
-                } catch (Exception e) {
-                    LOGGER.severe("Error auto-unpacking " + fileName + ": " + e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-            } else {
-                LOGGER.warning("Neither TXT nor DAT file found for: " + fileName);
-                return;
-            }
+        if (txtFile.exists()) {
+            try {
+                LOGGER.info("Reading from working file: " + txtFile.getName());
+                return Files.readAllLines(txtFile.toPath(), StandardCharsets.UTF_8);
+            } catch (Exception e) {}
         }
-        
+
+        File datFile = new File(systemFolder, fileName);
         try {
-            List<String> lines = Files.readAllLines(txtFile.toPath(), StandardCharsets.UTF_8);
-            
-            // Use helper method to generate updated content
-            List<String> newLines = generateUpdatedContent(lines, item, isItemName);
-            
-            if (newLines != null && !newLines.isEmpty()) {
-                Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
-                LOGGER.info("Updated " + txtFile.getName());
-                
-                // Auto-pack (Encrypt)
-                packFile(txtFile);
-            }
-            
-        } catch (Exception e) {
-            LOGGER.severe("Error processing file " + fileName + ": " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    private void packFile(File txtFile) {
-        if (_mainFrame == null) {
-            LOGGER.severe("Cannot pack " + txtFile.getName() + ": Main Frame reference is missing.");
-            return;
-        }
-
-        File datFile = new File(txtFile.getParent(), txtFile.getName().replace(".txt", ".dat"));
-        LOGGER.info("Attempting to pack: " + txtFile.getName() + " -> " + datFile.getName());
-
-        try {
-            // 1. Get the appropriate encryptor
-            DatCrypter crypter = _mainFrame.getEncryptor(datFile);
-            if (crypter == null) {
-                LOGGER.severe("Encryption failed: No encryptor found for " + datFile.getName());
-                return;
-            }
-
-            // 2. Get Descriptor
-            String chronicle = ConfigWindow.CURRENT_CHRONICLE;
-            org.l2jmobius.xml.Descriptor desc = DescriptorParser.getInstance().findDescriptorForFile(chronicle, datFile.getName());
-            if (desc == null) {
-                LOGGER.severe("No descriptor found for " + datFile.getName() + " (" + chronicle + ")");
-                return;
-            }
-
-            // 3. Read Text
-            String text = new String(Files.readAllBytes(txtFile.toPath()), StandardCharsets.UTF_8);
-
-            // 4. Parse Data (Text -> Binary) using DescriptorWriter
-            // We need a dummy ActionTask for progress reporting
             org.l2jmobius.actions.ActionTask dummyTask = new org.l2jmobius.actions.ActionTask(null) {
                 @Override public Void doInBackground() { return null; }
                 @Override protected void action() {}
                 @Override public void done() {}
                 @Override public void propertyChange(java.beans.PropertyChangeEvent evt) {}
             };
-
-            byte[] binaryData = DescriptorWriter.parseData(dummyTask, 100.0, datFile, crypter, desc, text, true);
-
-            if (binaryData == null || binaryData.length == 0) {
-                LOGGER.severe("DescriptorWriter returned empty data for " + datFile.getName());
-                return;
-            }
-
-            // 5. Encrypt and Write
-            org.l2jmobius.clientcryptor.DatFile.encrypt(binaryData, datFile.getPath(), crypter);
-            LOGGER.info("Successfully packed " + datFile.getName() + " (" + binaryData.length + " bytes before encryption)");
-
-        } catch (Exception e) {
-            LOGGER.severe("Error packing file " + datFile.getName() + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+            String text = OpenDat.start(dummyTask, 100.0, ConfigWindow.CURRENT_CHRONICLE, datFile, true);
+            if (text == null) return null;
+            List<String> lines = new ArrayList<>();
+            for(String s : text.split("\r\n|\n")) lines.add(s);
+            return lines;
+        } catch (Exception e) { return null; }
     }
-    
+
+    private boolean processDatFile(File systemFolder, String fileName, ForgeItem item, boolean isItemName) {
+        List<String> lines = readDatFile(systemFolder, fileName);
+        if (lines == null) return false;
+        List<String> newLines = generateUpdatedContent(lines, item, isItemName);
+
+        // 1. SYNC TXT FILE
+        try {
+            File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
+            Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            LOGGER.warning("Failed to sync TXT file: " + e.getMessage());
+        }
+
+        // 2. Save to DAT
+        File datFile = new File(systemFolder, fileName);
+        ConfigWindow.LAST_FILE_SELECTED = datFile.getAbsolutePath();
+        _mainFrame.setEditorText(String.join("\r\n", newLines));
+        new SaveDat(_mainFrame, datFile, ConfigWindow.CURRENT_CHRONICLE).doInBackground();
+
+        return true;
+    }
+
+    private boolean exportTxtOnly(File systemFolder, String fileName, ForgeItem item) {
+        List<String> lines = readDatFile(systemFolder, fileName);
+        if (lines == null) return false;
+        List<String> newLines = generateUpdatedContent(lines, item, false);
+        File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
+        try {
+            Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
+            LOGGER.info("Exported " + txtFile.getName());
+            return true;
+        } catch (Exception e) { return false; }
+    }
+
+    // --- UPDATED GENERATOR (REPLACE IN-PLACE) ---
     private List<String> generateUpdatedContent(List<String> lines, ForgeItem item, boolean isItemName) {
         List<String> newLines = new ArrayList<>();
-        
+
         if (isItemName) {
-            // Update itemname-e.txt with strict formatting
+            // --- 1. HANDLE ITEMNAME-E.DAT ---
             String format = "item_name_begin\tid=%d\tname=[%s]\tadditionalname=[%s]\tdescription=[%s]\tpopup=-1\tsupercnt0=0\tsetid_1={}\tset_bonus_desc=[]\tsupercnt1=0\tset_extra_id={}\tset_extra_desc=[]\tunknown={0;0;0;0;0;0;0;0;0}\tspecial_enchant_amount=0\tspecial_enchant_desc=[]\tcolor=1\titem_name_end";
-            String newItemLine = String.format(format, 
-                    item.getId(), 
-                    item.getName(), 
-                    item.getAdditionalName() != null ? item.getAdditionalName() : "", 
-                    item.getDescription() != null ? item.getDescription() : "");
-            
+            String newItemLine = String.format(format, item.getId(), item.getName(), item.getAdditionalName() != null ? item.getAdditionalName() : "", item.getDescription() != null ? item.getDescription() : "");
+
+            boolean replaced = false;
+            String searchId = "id=" + item.getId() + "\t";
+
             for (String line : lines) {
-                // Check Condition: if (line.contains("id=" + item.getId() + "\t"))
-                if (line.contains("id=" + item.getId() + "\t")) {
-                    continue; // Skip existing line to replace it
+                if (line.contains(searchId)) {
+                    newLines.add(newItemLine); // Replace existing
+                    replaced = true;
+                } else {
+                    newLines.add(line); // Keep existing
                 }
-                newLines.add(line);
             }
-            newLines.add(newItemLine);
-            
+            if (!replaced) newLines.add(newItemLine); // Append new
+
         } else {
-            // Update group file
+            // --- 2. HANDLE GROUP FILES ---
             String templateId = item.getVisualTemplate();
             String templateLine = null;
-            
-            // 1. Convert the target ID to a clean String
             String searchId = "object_id=" + String.valueOf(templateId).trim();
-            System.out.println("DEBUG: Looking for strict match: '" + searchId + "' at Index 2");
-            int rowIndex = 0;
 
+            // Find Template first (to construct new line)
             for (String line : lines) {
-                if (line == null || line.trim().isEmpty()) {
-                    rowIndex++;
-                    continue;
+                String[] t = line.split("\t");
+                if (t.length > 2 && t[2].trim().equals(searchId)) {
+                    templateLine = line;
+                    break;
                 }
-
-                String[] tokens = line.split("\t", -1);
-                
-                // 2. Check Index 2
-                if (tokens.length > 2) {
-                    String cellString = tokens[2].trim();
-                    
-                    // 3. Debug the first row
-                    if (rowIndex == 0) {
-                        System.out.println("FULL ROW DUMP: " + line);
-                        for (int i = 0; i < tokens.length; i++) {
-                            System.out.println("Index " + i + ": " + tokens[i]);
-                        }
-                    }
-
-                    // 4. Compare Strings
-                    if (cellString.equals(searchId)) {
-                        templateLine = line;
-                        System.out.println("DEBUG: MATCH FOUND at row " + rowIndex);
-                        break;
-                    }
-                }
-                rowIndex++;
             }
-            
+
             if (templateLine != null) {
                 String[] tokens = templateLine.split("\t", -1);
-                
-                // FIX: If the line ends with a tab, split(-1) creates an extra empty token.
-                // We must remove it to match the descriptor structure.
                 if (tokens.length > 0 && tokens[tokens.length - 1].isEmpty()) {
-                    String[] trimmed = new String[tokens.length - 1];
-                    System.arraycopy(tokens, 0, trimmed, 0, tokens.length - 1);
-                    tokens = trimmed;
+                    String[] t = new String[tokens.length-1]; System.arraycopy(tokens,0,t,0,tokens.length-1); tokens=t;
                 }
 
                 if (tokens.length > 18) {
-                    // 2. Cloning Logic (Setting the new ID)
+                    // Update Values
                     tokens[2] = "object_id=" + item.getId();
-                    
-                    // 3. Icon Logic (Updating Index 18)
                     if (item.getIcon() != null && !item.getIcon().isEmpty()) {
-                        String oldIconVal = tokens[18];
-                        String newIconVal = oldIconVal.replaceFirst("icon\\.[\\w_]+", item.getIcon());
-                        tokens[18] = newIconVal;
+                        tokens[18] = tokens[18].replaceFirst("icon\\.[\\w_]+", item.getIcon());
                     }
-                    
+                    String type = item.getType();
+                    if ("Weapon".equalsIgnoreCase(type)) {
+                        if (tokens.length > 20) tokens[20] = String.valueOf(item.getWeight());
+                        if (tokens.length > 21) tokens[21] = String.valueOf(getMaterialId(item.getMaterial()));
+                        if (tokens.length > 23) tokens[23] = String.valueOf(getCrystalId(item.getCrystalType()));
+                        if (tokens.length > 32) tokens[32] = String.valueOf(item.getSoulshotCount());
+                        if (tokens.length > 33) tokens[33] = String.valueOf(item.getSpiritshotCount());
+                        if (tokens.length > 44) tokens[44] = String.valueOf(item.getMpConsume());
+                    } else if ("Armor".equalsIgnoreCase(type)) {
+                        if (tokens.length > 4) tokens[4] = String.valueOf(getBodyPartId(item.getBodyPart()));
+                        if (tokens.length > 16) tokens[16] = String.valueOf(item.getWeight());
+                        if (tokens.length > 17) tokens[17] = String.valueOf(getMaterialId(item.getMaterial()));
+                        if (tokens.length > 18) tokens[18] = String.valueOf(getCrystalId(item.getCrystalType()));
+                    } else {
+                        if (tokens.length > 5) tokens[5] = String.valueOf(item.getWeight());
+                        if (tokens.length > 7) tokens[7] = String.valueOf(getMaterialId(item.getMaterial()));
+                        if (tokens.length > 8) tokens[8] = String.valueOf(getCrystalId(item.getCrystalType()));
+                    }
                     String newLine = String.join("\t", tokens);
-                    
-                    // Append
+
+                    // Rebuild File with In-Place Replacement
+                    boolean replaced = false;
+                    String targetId = "object_id=" + item.getId();
+
                     for (String line : lines) {
-                         // Check if ID exists to avoid duplicates (using the new ID format)
-                         String[] lineTokens = line.split("\t", -1);
-                         if (lineTokens.length > 2 && lineTokens[2].trim().equals("object_id=" + item.getId())) {
-                             continue;
-                         }
-                         newLines.add(line);
+                        String[] t = line.split("\t");
+                        if (t.length > 2 && t[2].trim().equals(targetId)) {
+                            newLines.add(newLine); // Replace
+                            replaced = true;
+                        } else {
+                            newLines.add(line); // Keep
+                        }
                     }
-                    newLines.add(newLine);
-                } else {
-                    LOGGER.severe("Template line found but has insufficient columns (" + tokens.length + "). Expected > 18.");
-                    newLines.addAll(lines);
-                }
-            } else {
-                LOGGER.severe("Template ID " + templateId + " not found, aborting save.");
-                return null; // Return null to indicate failure
-            }
+                    if (!replaced) newLines.add(newLine); // Append
+
+                } else newLines.addAll(lines); // Malformed template
+            } else newLines.addAll(lines); // Template not found
         }
         return newLines;
     }
 
-    private String getGroupFileName(String type) {
-        if (type == null) return "etcitemgrp.dat";
-        switch (type.toLowerCase()) {
-            case "weapon": return "weapongrp.dat";
-            case "armor": return "armorgrp.dat";
-            default: return "etcitemgrp.dat";
-        }
+    // --- HELPERS ---
+    private void showMessage(String msg) { javax.swing.JOptionPane.showMessageDialog(_mainFrame, msg, "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE); }
+    private int safeParseInt(String val) { try { return Integer.parseInt(val.trim()); } catch (Exception e) { return 0; } }
+    private String extractTagValue(String line, String tag) { Pattern p = Pattern.compile(tag + "=\\[(.*?)\\]"); Matcher m = p.matcher(line); return m.find() ? m.group(1) : ""; }
+
+    // Reverse Maps (Name -> ID)
+    private int getMaterialId(String name) {
+        String[] m = {"steel","fine_steel","blood_steel","bronze","silver","gold","mithril","ori_harukon","paper","wood","cloth","leather","bone","horn","damascus","adamanta","chrysolite","crystal","liquid","scale_of_dragon","dyestuff","cobweb","seed"};
+        for(int i=0;i<m.length;i++) if(m[i].equalsIgnoreCase(name)) return i; return 0;
     }
+    private int getCrystalId(String name) {
+        String[] c = {"none","d","c","b","a","s","s80","s84"};
+        for(int i=0;i<c.length;i++) if(c[i].equalsIgnoreCase(name)) return i; return 0;
+    }
+    private int getBodyPartId(String name) {
+        String[] b = {"underwear","rear;lear","head","hair","neck","gloves","chest","legs","feet","back","lrhand","onepiece","rhand"};
+        for(int i=0;i<b.length;i++) if(b[i].equalsIgnoreCase(name)) return i; return 0;
+    }
+
+    // Forward Maps (ID -> Name)
+    private String getMaterialName(int id) { String[] m = {"steel","fine_steel","blood_steel","bronze","silver","gold","mithril","ori_harukon","paper","wood","cloth","leather","bone","horn","damascus","adamanta","chrysolite","crystal","liquid","scale_of_dragon","dyestuff","cobweb","seed"}; return (id>=0 && id<m.length) ? m[id] : "steel"; }
+    private String getCrystalName(int id) { String[] c = {"none","d","c","b","a","s","s80","s84"}; return (id>=0 && id<c.length) ? c[id] : "none"; }
+    private String getBodyPartName(int id) { String[] b = {"underwear","rear;lear","head","hair","neck","gloves","chest","legs","feet","back","lrhand","onepiece","rhand"}; return (id>=0 && id<b.length) ? b[id] : "none"; }
+
+    private String getGroupFileName(String type) { if (type == null) return "etcitemgrp.dat"; switch (type.toLowerCase()) { case "weapon": return "weapongrp.dat"; case "armor": return "armorgrp.dat"; default: return "etcitemgrp.dat"; } }
 }

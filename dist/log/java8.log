@@ -1,41 +1,6 @@
-2026.02.04 15:18:02,683	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:18:02,749	INFO	52	org.l2jmobius.L2ClientDat	Open file: armorgrp.dat
-2026.02.04 15:18:02,785	INFO	69	org.l2jmobius.L2ClientDat	File armorgrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:18:03,054	INFO	69	org.l2jmobius.L2ClientDat	Decrypt armorgrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:18:03,055	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:18:03,777	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 15:18:17,155	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.04 15:18:25,252	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:18:25,254	INFO	52	org.l2jmobius.L2ClientDat	Open file: armorgrp.dat
-2026.02.04 15:18:25,269	INFO	69	org.l2jmobius.L2ClientDat	File armorgrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:18:25,440	INFO	69	org.l2jmobius.L2ClientDat	Decrypt armorgrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:18:25,441	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:18:26,057	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 15:18:54,183	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:18:54,184	INFO	52	org.l2jmobius.L2ClientDat	Open file: npcgrp.dat
-2026.02.04 15:18:54,216	INFO	69	org.l2jmobius.L2ClientDat	File npcgrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:18:54,341	INFO	69	org.l2jmobius.L2ClientDat	Decrypt npcgrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:18:54,342	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:18:54,550	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 15:19:07,836	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 2 sec
-2026.02.04 15:19:11,972	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:19:11,973	INFO	52	org.l2jmobius.L2ClientDat	Open file: npcgrp.dat
-2026.02.04 15:19:11,993	INFO	69	org.l2jmobius.L2ClientDat	File npcgrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:19:12,125	INFO	69	org.l2jmobius.L2ClientDat	Decrypt npcgrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:19:12,126	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:19:12,315	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 15:19:24,773	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:19:24,774	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 15:19:24,793	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:19:24,877	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:19:24,877	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:19:25,083	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 15:19:33,124	INFO	69	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 2 sec
-2026.02.04 15:19:38,823	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 15:19:38,823	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 15:19:38,837	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 15:19:38,915	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 15:19:38,916	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 15:19:38,920	INFO	69	org.l2jmobius.L2ClientDat	Error while parsing variable NAME[effB] TYPE[UNICODE] in file NAME[weapongrp.dat]! Parsed data: 	effB=
-2026.02.04 15:19:38,924	INFO	69	org.l2jmobius.L2ClientDat	Unpacked not full 20882/5030807 diff: 5009912
-2026.02.04 15:19:38,947	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 18:02:22,524	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 18:02:22,607	INFO	52	org.l2jmobius.L2ClientDat	Open file: etcitemgrp.dat
+2026.02.05 18:02:22,626	INFO	69	org.l2jmobius.L2ClientDat	File etcitemgrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 18:02:22,703	INFO	69	org.l2jmobius.L2ClientDat	Decrypt etcitemgrp.dat file successfully by v413_encdec decrypter.
+2026.02.05 18:02:22,704	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 18:02:22,854	INFO	69	org.l2jmobius.L2ClientDat	Completed.

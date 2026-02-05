@@ -1,20 +1,2 @@
-2026.02.05 09:23:03,917	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 09:23:03,978	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 09:23:04,003	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 09:23:04,295	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 09:23:04,296	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 09:23:04,964	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.05 09:23:17,464	INFO	52	org.l2jmobius.forge.ItemForgeController	Starting item creation for ID: 40900 Name: 445
-2026.02.05 09:23:17,467	INFO	52	org.l2jmobius.forge.ItemForgeController	File itemname-e.dat is currently open. Updating UI directly.
-2026.02.05 09:23:17,901	INFO	52	org.l2jmobius.forge.ItemForgeController	Updated Main Window UI for itemname-e.dat
-2026.02.05 09:23:17,901	INFO	52	org.l2jmobius.forge.ItemForgeController	File weapongrp.dat is not open. Performing background load.
-2026.02.05 09:23:18,025	INFO	52	org.l2jmobius.forge.ItemForgeController	Updated weapongrp.txt
-2026.02.05 09:23:18,026	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to pack: weapongrp.txt -> weapongrp.dat
-2026.02.05 09:23:18,027	SEVERE	52	org.l2jmobius.forge.ItemForgeController	Encryption failed: No encryptor found for weapongrp.dat
-2026.02.05 09:24:12,026	INFO	70	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 09:24:18,475	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 09:24:18,475	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 09:24:18,515	INFO	70	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 09:24:18,692	INFO	70	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 09:24:18,692	INFO	70	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 09:24:19,084	INFO	70	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 19:01:03,397	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:01:05,849	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt

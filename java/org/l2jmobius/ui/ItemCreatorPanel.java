@@ -1,458 +1,404 @@
 package org.l2jmobius.ui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.util.prefs.Preferences;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
 import org.l2jmobius.forge.ForgeItem;
 import org.l2jmobius.forge.ItemForgeController;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ItemCreatorPanel extends JPanel {
-
-    private static final String VISUAL_TEMPLATE_HINT = "Enter Item ID to copy visuals from...";
-    private static File _lastIconDir;
-
-    // Core inputs
+    // UI Components
     private JTextField txtId;
     private JTextField txtName;
-    private JTextField txtAddName; // The yellow text
-    private JTextArea txtDescription; // Description field
-    private JComboBox<String> cbType; // Weapon, Armor, EtcItem
-
-    // Visual inputs
+    private JTextField txtAddName;
+    private JTextArea txtDesc;
+    private JComboBox<String> cbType;
+    private JTextField txtVisualTemplate;
     private JTextField txtIcon;
-    private JButton btnSelectIcon;
-    private JTextField txtVisualTemplate; // e.g., "Use Draconic Bow mesh"
 
-    // Server Specs inputs (Common)
+    // Server Specs
+    private JComboBox<String> cbBodyPart;
     private JComboBox<String> cbMaterial;
-    private JComboBox<String> cbCrystalType;
+    private JComboBox<String> cbCrystal;
     private JTextField txtWeight;
     private JTextField txtPrice;
 
-    // Dynamic Panels
-    private JPanel pnlWeaponSpecs;
-    private JPanel pnlArmorSpecs;
-    private JPanel pnlEtcSpecs;
-    private JPanel pnlDynamicContainer;
-
-    // Weapon Specs
-    private JComboBox<String> cbWeaponBodyPart;
-    private JTextField txtSoulshotCount;
-    private JTextField txtSpiritshotCount;
-    private JTextField txtRandomDamage;
-    private JCheckBox chkIsMagicWeapon;
+    // Weapon Specifics
+    private JTextField txtSoulshot;
+    private JTextField txtSpiritshot;
     private JTextField txtMpConsume;
 
-    // Armor Specs
-    private JComboBox<String> cbArmorBodyPart;
-    private JTextField txtDamageReduction;
+    // Labels
+    private JLabel lblBodyPart, lblShots, lblMp;
 
-    // EtcItem Specs
-    private JCheckBox chkStackable;
-    private JCheckBox chkQuestItem;
-    private JCheckBox chkImmediateEffect;
-    private JComboBox<String> cbEtcItemType;
+    // XML Output
+    private JTextArea txtServerXml;
 
-    // Stats Table
-    private DefaultTableModel statsModel;
-    private JTable statsTable;
+    // Persistence
+    private static File lastIconDir = new File(".");
+    private static final String PREF_WIDTH = "forge_width";
+    private static final String PREF_HEIGHT = "forge_height";
 
     public ItemCreatorPanel() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- Header Actions ---
-        JToolBar toolbar = new JToolBar();
-        JButton btnLoadTemplate = new JButton("Load Existing Item");
-        btnLoadTemplate.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "This feature is not yet implemented.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        // ---------------------------------------------------------
+        // 0. WINDOW SIZE PERSISTENCE
+        // ---------------------------------------------------------
+        Preferences prefs = Preferences.userNodeForPackage(ItemCreatorPanel.class);
+        int savedWidth = prefs.getInt(PREF_WIDTH, 950);
+        int savedHeight = prefs.getInt(PREF_HEIGHT, 700);
+        setPreferredSize(new Dimension(savedWidth, savedHeight));
+
+        this.addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0 && isDisplayable()) {
+                Window window = SwingUtilities.getWindowAncestor(this);
+                if (window != null) {
+                    window.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent we) {
+                            prefs.putInt(PREF_WIDTH, window.getWidth());
+                            prefs.putInt(PREF_HEIGHT, window.getHeight());
+                        }
+                    });
+                }
+            }
         });
-        JButton btnClear = new JButton("Reset");
-        toolbar.add(btnLoadTemplate);
-        toolbar.add(btnClear);
-        add(toolbar, BorderLayout.NORTH);
 
-        // --- Main Tabs ---
-        JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("1. Identity & Visuals", createIdentityPanel());
-        tabs.addTab("2. Server Specs", createServerSpecsPanel());
-        tabs.addTab("3. Combat Stats", createStatsPanel());
+        // ---------------------------------------------------------
+        // 1. HEADER & LOAD SECTION
+        // ---------------------------------------------------------
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JLabel lblTitle = new JLabel("Item Forge", JLabel.CENTER);
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        headerPanel.add(lblTitle, BorderLayout.NORTH);
 
-        add(tabs, BorderLayout.CENTER);
+        JPanel loadPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        loadPanel.setBorder(BorderFactory.createTitledBorder("Load Existing"));
 
-        // --- Footer Actions ---
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnGenerate = new JButton("FORGE ITEM (Generate Files)");
-        btnGenerate.setFont(new Font("Arial", Font.BOLD, 14));
-        btnGenerate.setBackground(new Color(100, 200, 100)); // Light Green
-        btnGenerate.addActionListener(e -> {
+        JTextField txtLoadId = new JTextField(6);
+        JButton btnLoad = new JButton("Load ID");
+
+        btnLoad.addActionListener(e -> {
             try {
-                // 1. Get Data from Form
-                ForgeItem item = getFormData();
-                ItemForgeController controller = new ItemForgeController();
-                
-                // 2. CRITICAL FIX: Traverse up to find the Main Window (L2ClientDat)
-                java.awt.Window parent = javax.swing.SwingUtilities.getWindowAncestor(this);
-                org.l2jmobius.L2ClientDat mainFrame = null;
-
-                if (parent instanceof org.l2jmobius.L2ClientDat) {
-                    mainFrame = (org.l2jmobius.L2ClientDat) parent;
-                } else if (parent instanceof javax.swing.JDialog) {
-                    // If we are in a popup dialog, get its owner
-                    java.awt.Window owner = ((javax.swing.JDialog) parent).getOwner();
-                    if (owner instanceof org.l2jmobius.L2ClientDat) {
-                        mainFrame = (org.l2jmobius.L2ClientDat) owner;
+                int id = Integer.parseInt(txtLoadId.getText());
+                ItemForgeController controller = getController();
+                if (controller != null) {
+                    ForgeItem loadedItem = controller.loadItem(id);
+                    if (loadedItem != null) {
+                        setFormData(loadedItem);
+                        txtServerXml.setText(controller.generateServerXml(loadedItem));
+                        JOptionPane.showMessageDialog(this, "Item Loaded Successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Item ID " + id + " not found.", "Not Found", JOptionPane.WARNING_MESSAGE);
                     }
                 }
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(this, "Invalid ID format.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
-                // 3. Pass the Main Frame to the Controller
-                if (mainFrame != null) {
-                    controller.setMainFrame(mainFrame);
+        // --- RESET BUTTON ---
+        JButton btnReset = new JButton("Reset View");
+        btnReset.addActionListener(e -> {
+            txtLoadId.setText("");
+            resetForm();
+        });
+
+        loadPanel.add(new JLabel("ID:"));
+        loadPanel.add(txtLoadId);
+        loadPanel.add(btnLoad);
+        loadPanel.add(btnReset); // Added
+
+        headerPanel.add(loadPanel, BorderLayout.SOUTH);
+        add(headerPanel, BorderLayout.NORTH);
+
+        // ---------------------------------------------------------
+        // 2. MAIN SPLIT PANE
+        // ---------------------------------------------------------
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setResizeWeight(0.6);
+
+        // LEFT: Form
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // --- Column 1 ---
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Item ID:"), gbc);
+        txtId = new JTextField(10);
+        gbc.gridx = 1; formPanel.add(txtId, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Type:"), gbc);
+        cbType = new JComboBox<>(new String[]{"Weapon", "Armor", "EtcItem"});
+        cbType.addActionListener(e -> updateFieldVisibility());
+        gbc.gridx = 1; formPanel.add(cbType, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Name:"), gbc);
+        txtName = new JTextField(20);
+        gbc.gridx = 1; formPanel.add(txtName, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Add. Name:"), gbc);
+        txtAddName = new JTextField(20);
+        gbc.gridx = 1; formPanel.add(txtAddName, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Description:"), gbc);
+        txtDesc = new JTextArea(3, 20);
+        txtDesc.setLineWrap(true);
+        txtDesc.setWrapStyleWord(true);
+        gbc.gridx = 1; formPanel.add(new JScrollPane(txtDesc), gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Visual Template ID:"), gbc);
+        JPanel pnlTemplate = new JPanel(new BorderLayout(5, 0));
+        txtVisualTemplate = new JTextField(10);
+        JLabel lblHint = new JLabel("(Source ID for Model)");
+        lblHint.setFont(new Font("Arial", Font.ITALIC, 11));
+        lblHint.setForeground(Color.GRAY);
+        pnlTemplate.add(txtVisualTemplate, BorderLayout.CENTER);
+        pnlTemplate.add(lblHint, BorderLayout.EAST);
+        gbc.gridx = 1; formPanel.add(pnlTemplate, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Icon Name:"), gbc);
+        JPanel pnlIcon = new JPanel(new BorderLayout(5, 0));
+        txtIcon = new JTextField(15);
+        JButton btnBrowseIcon = new JButton("...");
+        btnBrowseIcon.addActionListener(e -> {
+            JFileChooser fc = new JFileChooser(lastIconDir);
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                lastIconDir = fc.getCurrentDirectory();
+                File selected = fc.getSelectedFile();
+                String fileName = selected.getName();
+                String folderName = selected.getParentFile().getName();
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex > 0) fileName = fileName.substring(0, dotIndex);
+                txtIcon.setText(folderName + "." + fileName);
+            }
+        });
+        pnlIcon.add(txtIcon, BorderLayout.CENTER);
+        pnlIcon.add(btnBrowseIcon, BorderLayout.EAST);
+        gbc.gridx = 1; formPanel.add(pnlIcon, gbc);
+
+        // --- Column 2 ---
+        int col2X = 2;
+        int rowStart = 0;
+
+        gbc.gridx = col2X; gbc.gridy = rowStart;
+        lblBodyPart = new JLabel("Body Part:");
+        formPanel.add(lblBodyPart, gbc);
+        cbBodyPart = new JComboBox<>(new String[]{"rhand", "lhand", "lrhand", "chest", "legs", "feet", "head", "gloves", "none"});
+        gbc.gridx = col2X + 1; formPanel.add(cbBodyPart, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        formPanel.add(new JLabel("Material:"), gbc);
+        cbMaterial = new JComboBox<>(new String[]{"steel", "fine_steel", "wood", "bone", "bronze", "leather", "cloth", "gold", "mithril", "liquid", "paper"});
+        gbc.gridx = col2X + 1; formPanel.add(cbMaterial, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        formPanel.add(new JLabel("Crystal Type:"), gbc);
+        cbCrystal = new JComboBox<>(new String[]{"none", "d", "c", "b", "a", "s", "s80", "s84"});
+        gbc.gridx = col2X + 1; formPanel.add(cbCrystal, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        formPanel.add(new JLabel("Weight:"), gbc);
+        txtWeight = new JTextField("1000", 6);
+        gbc.gridx = col2X + 1; formPanel.add(txtWeight, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        formPanel.add(new JLabel("Price:"), gbc);
+        txtPrice = new JTextField("0", 6);
+        gbc.gridx = col2X + 1; formPanel.add(txtPrice, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        lblShots = new JLabel("Soul/Spirit Shot:");
+        formPanel.add(lblShots, gbc);
+        JPanel shotPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        txtSoulshot = new JTextField("1", 3);
+        txtSpiritshot = new JTextField("1", 3);
+        shotPanel.add(txtSoulshot);
+        shotPanel.add(new JLabel(" / "));
+        shotPanel.add(txtSpiritshot);
+        gbc.gridx = col2X + 1; formPanel.add(shotPanel, gbc);
+
+        gbc.gridx = col2X; gbc.gridy++;
+        lblMp = new JLabel("MP Consume:");
+        formPanel.add(lblMp, gbc);
+        txtMpConsume = new JTextField("0", 5);
+        gbc.gridx = col2X + 1; formPanel.add(txtMpConsume, gbc);
+
+        // RIGHT: XML
+        JPanel xmlPanel = new JPanel(new BorderLayout());
+        xmlPanel.setBorder(BorderFactory.createTitledBorder("Server XML"));
+        txtServerXml = new JTextArea();
+        txtServerXml.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        txtServerXml.setEditable(false);
+        xmlPanel.add(new JScrollPane(txtServerXml), BorderLayout.CENTER);
+
+        splitPane.setLeftComponent(new JScrollPane(formPanel));
+        splitPane.setRightComponent(xmlPanel);
+
+        add(splitPane, BorderLayout.CENTER);
+
+        // 3. FOOTER
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnGenerate = new JButton("FORGE ITEM");
+        btnGenerate.setFont(new Font("Arial", Font.BOLD, 14));
+        btnGenerate.setBackground(new Color(100, 200, 100));
+
+        btnGenerate.addActionListener(e -> {
+            try {
+                ForgeItem item = getFormData();
+                ItemForgeController controller = getController();
+                if (controller != null) {
+                    txtServerXml.setText(controller.generateServerXml(item));
                     controller.createItem(item);
-                } else {
-                    JOptionPane.showMessageDialog(this, 
-                        "Internal Error: Could not find Main Window context.\nPlease restart the tool.", 
-                        "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                    
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, 
-                    "Error creating item: " + ex.getMessage(), 
-                    "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         footer.add(btnGenerate);
         add(footer, BorderLayout.SOUTH);
-        
-        // Initialize dynamic panel state
-        updateDynamicPanels();
+
+        updateFieldVisibility();
     }
 
-    private JPanel createIdentityPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+    // --- Helpers ---
+    private void updateFieldVisibility() {
+        String type = (String) cbType.getSelectedItem();
+        boolean isWeapon = "Weapon".equalsIgnoreCase(type);
+        boolean isArmor = "Armor".equalsIgnoreCase(type);
+        cbBodyPart.setEnabled(isWeapon || isArmor);
+        lblBodyPart.setEnabled(isWeapon || isArmor);
+        txtSoulshot.setEnabled(isWeapon);
+        txtSpiritshot.setEnabled(isWeapon);
+        lblShots.setEnabled(isWeapon);
+        txtMpConsume.setEnabled(isWeapon);
+        lblMp.setEnabled(isWeapon);
+    }
 
-        // Row 1: ID and Type
-        gbc.gridx = 0; gbc.gridy = 0; panel.add(new JLabel("Item ID:"), gbc);
-        gbc.gridx = 1; txtId = new JTextField(10); panel.add(txtId, gbc);
+    // --- RESET VIEW FUNCTION ---
+    private void resetForm() {
+        txtId.setText("");
+        txtName.setText("");
+        txtAddName.setText("");
+        txtDesc.setText("");
 
-        gbc.gridx = 2; panel.add(new JLabel("Type:"), gbc);
-        gbc.gridx = 3;
-        String[] types = {"Weapon", "Armor", "EtcItem"}; // Derived from your XML types
-        cbType = new JComboBox<>(types);
-        cbType.addActionListener(e -> updateDynamicPanels());
-        panel.add(cbType, gbc);
+        // Reset Combo Boxes
+        if (cbType.getItemCount() > 0) cbType.setSelectedIndex(0);
+        if (cbBodyPart.getItemCount() > 0) cbBodyPart.setSelectedIndex(0);
+        if (cbMaterial.getItemCount() > 0) cbMaterial.setSelectedIndex(0);
+        if (cbCrystal.getItemCount() > 0) cbCrystal.setSelectedIndex(0);
 
-        // Row 2: Names
-        gbc.gridx = 0; gbc.gridy = 1; panel.add(new JLabel("Name:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        txtName = new JTextField(20); panel.add(txtName, gbc);
-        gbc.gridwidth = 1;
-        
-        // Row 3: Additional Name
-        gbc.gridx = 0; gbc.gridy = 2; panel.add(new JLabel("Add. Name:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        txtAddName = new JTextField(20); panel.add(txtAddName, gbc);
-        gbc.gridwidth = 1;
-        
-        // Row 4: Description
-        gbc.gridx = 0; gbc.gridy = 3; panel.add(new JLabel("Description:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        txtDescription = new JTextArea(3, 20);
-        txtDescription.setLineWrap(true);
-        txtDescription.setWrapStyleWord(true);
-        JScrollPane scrollDescription = new JScrollPane(txtDescription);
-        panel.add(scrollDescription, gbc);
-        gbc.gridwidth = 1;
+        txtVisualTemplate.setText("");
+        txtIcon.setText("");
 
-        // Row 5: Visual Template (The "Copy From" feature)
-        gbc.gridx = 0; gbc.gridy = 4; panel.add(new JLabel("Visual Template:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 2;
-        txtVisualTemplate = new JTextField(VISUAL_TEMPLATE_HINT);
-        txtVisualTemplate.setForeground(Color.GRAY);
-        txtVisualTemplate.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (txtVisualTemplate.getText().equals(VISUAL_TEMPLATE_HINT)) {
-                    txtVisualTemplate.setText("");
-                    txtVisualTemplate.setForeground(Color.BLACK);
-                }
+        // Reset defaults
+        txtWeight.setText("1000");
+        txtPrice.setText("0");
+        txtSoulshot.setText("1");
+        txtSpiritshot.setText("1");
+        txtMpConsume.setText("0");
+
+        txtServerXml.setText("");
+
+        updateFieldVisibility();
+    }
+
+    private ItemForgeController getController() {
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        org.l2jmobius.L2ClientDat mainFrame = null;
+        if (parent instanceof org.l2jmobius.L2ClientDat) {
+            mainFrame = (org.l2jmobius.L2ClientDat) parent;
+        } else if (parent instanceof javax.swing.JDialog) {
+            Window owner = ((javax.swing.JDialog) parent).getOwner();
+            if (owner instanceof org.l2jmobius.L2ClientDat) {
+                mainFrame = (org.l2jmobius.L2ClientDat) owner;
             }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (txtVisualTemplate.getText().isEmpty()) {
-                    txtVisualTemplate.setText(VISUAL_TEMPLATE_HINT);
-                    txtVisualTemplate.setForeground(Color.GRAY);
-                }
-            }
-        });
-        panel.add(txtVisualTemplate, gbc);
-
-        // Row 6: Icon
-        gbc.gridx = 0; gbc.gridy = 5; panel.add(new JLabel("Icon String:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 2;
-        txtIcon = new JTextField();
-        panel.add(txtIcon, gbc);
-        gbc.gridwidth = 1;
-
-        gbc.gridx = 3;
-        btnSelectIcon = new JButton("Browse...");
-        btnSelectIcon.addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser(_lastIconDir);
-            fileChooser.setDialogTitle("Select Icon");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            
-            int result = fileChooser.showOpenDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                _lastIconDir = fileChooser.getCurrentDirectory();
-                
-                // Construct icon string: ParentDir.FileNameWithoutExtension
-                String parentName = selectedFile.getParentFile().getName();
-                String fileName = selectedFile.getName();
-                if (fileName.lastIndexOf('.') > 0) {
-                    fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-                }
-                String iconString = parentName + "." + fileName;
-                
-                txtIcon.setText(iconString);
-            }
-        });
-        panel.add(btnSelectIcon, gbc);
-
-        return panel;
-    }
-
-    private JPanel createServerSpecsPanel() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        
-        // Common Specs Panel
-        JPanel commonPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        commonPanel.setBorder(BorderFactory.createTitledBorder("Common Specifications"));
-
-        commonPanel.add(new JLabel("Material:"));
-        String[] materials = {"STEEL", "FINE_STEEL", "WOOD", "CLOTH", "LEATHER", "BONE", "BRONZE", "GOLD", "LIQUID"};
-        cbMaterial = new JComboBox<>(materials);
-        commonPanel.add(cbMaterial);
-
-        commonPanel.add(new JLabel("Crystal Type:"));
-        String[] crystals = {"NONE", "D", "C", "B", "A", "S", "S80", "S84"};
-        cbCrystalType = new JComboBox<>(crystals);
-        commonPanel.add(cbCrystalType);
-
-        commonPanel.add(new JLabel("Weight:"));
-        txtWeight = new JTextField("0");
-        commonPanel.add(txtWeight);
-
-        commonPanel.add(new JLabel("Price (Adena):"));
-        txtPrice = new JTextField("0");
-        commonPanel.add(txtPrice);
-        
-        mainPanel.add(commonPanel, BorderLayout.NORTH);
-
-        // Dynamic Container
-        pnlDynamicContainer = new JPanel(new CardLayout());
-        
-        // Weapon Specs Panel
-        pnlWeaponSpecs = new JPanel(new GridLayout(0, 2, 10, 10));
-        pnlWeaponSpecs.setBorder(BorderFactory.createTitledBorder("Weapon Specifications"));
-        pnlWeaponSpecs.add(new JLabel("Body Part:"));
-        String[] weaponBodyParts = {"rhand", "lrhand", "bigsword", "dual"};
-        cbWeaponBodyPart = new JComboBox<>(weaponBodyParts);
-        pnlWeaponSpecs.add(cbWeaponBodyPart);
-        pnlWeaponSpecs.add(new JLabel("Soulshot Usage:"));
-        txtSoulshotCount = new JTextField("1");
-        pnlWeaponSpecs.add(txtSoulshotCount);
-        pnlWeaponSpecs.add(new JLabel("Spiritshot Usage:"));
-        txtSpiritshotCount = new JTextField("1");
-        pnlWeaponSpecs.add(txtSpiritshotCount);
-        pnlWeaponSpecs.add(new JLabel("Random Damage:"));
-        txtRandomDamage = new JTextField("10");
-        pnlWeaponSpecs.add(txtRandomDamage);
-        pnlWeaponSpecs.add(new JLabel("MP Consume:"));
-        txtMpConsume = new JTextField("0");
-        pnlWeaponSpecs.add(txtMpConsume);
-        pnlWeaponSpecs.add(new JLabel("Is Magic Weapon:"));
-        chkIsMagicWeapon = new JCheckBox();
-        pnlWeaponSpecs.add(chkIsMagicWeapon);
-        
-        // Armor Specs Panel
-        pnlArmorSpecs = new JPanel(new GridLayout(0, 2, 10, 10));
-        pnlArmorSpecs.setBorder(BorderFactory.createTitledBorder("Armor Specifications"));
-        pnlArmorSpecs.add(new JLabel("Body Part:"));
-        String[] armorBodyParts = {"chest", "legs", "gloves", "feet", "head", "fullarmor", "hair", "face"};
-        cbArmorBodyPart = new JComboBox<>(armorBodyParts);
-        pnlArmorSpecs.add(cbArmorBodyPart);
-        pnlArmorSpecs.add(new JLabel("Damage Reduction:"));
-        txtDamageReduction = new JTextField("0");
-        pnlArmorSpecs.add(txtDamageReduction);
-        
-        // EtcItem Specs Panel
-        pnlEtcSpecs = new JPanel(new GridLayout(0, 2, 10, 10));
-        pnlEtcSpecs.setBorder(BorderFactory.createTitledBorder("EtcItem Specifications"));
-        pnlEtcSpecs.add(new JLabel("EtcItem Type:"));
-        String[] etcTypes = {"POTION", "SCROLL", "RECIPE", "MATERIAL", "OTHER"};
-        cbEtcItemType = new JComboBox<>(etcTypes);
-        pnlEtcSpecs.add(cbEtcItemType);
-        pnlEtcSpecs.add(new JLabel("Stackable:"));
-        chkStackable = new JCheckBox();
-        pnlEtcSpecs.add(chkStackable);
-        pnlEtcSpecs.add(new JLabel("Quest Item:"));
-        chkQuestItem = new JCheckBox();
-        pnlEtcSpecs.add(chkQuestItem);
-        pnlEtcSpecs.add(new JLabel("Immediate Effect:"));
-        chkImmediateEffect = new JCheckBox();
-        pnlEtcSpecs.add(chkImmediateEffect);
-
-        pnlDynamicContainer.add(pnlWeaponSpecs, "Weapon");
-        pnlDynamicContainer.add(pnlArmorSpecs, "Armor");
-        pnlDynamicContainer.add(pnlEtcSpecs, "EtcItem");
-        
-        mainPanel.add(pnlDynamicContainer, BorderLayout.CENTER);
-
-        return mainPanel;
-    }
-    
-    private void updateDynamicPanels() {
-        CardLayout cl = (CardLayout) (pnlDynamicContainer.getLayout());
-        String selectedType = (String) cbType.getSelectedItem();
-        cl.show(pnlDynamicContainer, selectedType);
-    }
-
-    private JPanel createStatsPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-
-        // Stats Table Column
-        String[] columns = {"Stat Name (e.g., pAtk)", "Value", "Operation (Set/Add)"};
-        statsModel = new DefaultTableModel(columns, 0);
-        statsTable = new JTable(statsModel);
-
-        // Pre-fill some common stats from your XML
-        statsModel.addRow(new Object[]{"pAtk", "0", "set"});
-        statsModel.addRow(new Object[]{"mAtk", "0", "set"});
-        statsModel.addRow(new Object[]{"critRate", "0", "set"});
-        statsModel.addRow(new Object[]{"pAtkSpd", "0", "set"});
-
-        JScrollPane scroll = new JScrollPane(statsTable);
-        panel.add(scroll, BorderLayout.CENTER);
-
-        // Add/Remove buttons
-        JPanel buttons = new JPanel();
-        JButton btnAdd = new JButton("+ Add Stat");
-        JButton btnRem = new JButton("- Remove Selected");
-
-        btnAdd.addActionListener(e -> statsModel.addRow(new Object[]{"", "", "set"}));
-        btnRem.addActionListener(e -> {
-            if(statsTable.getSelectedRow() != -1)
-                statsModel.removeRow(statsTable.getSelectedRow());
-        });
-
-        buttons.add(btnAdd);
-        buttons.add(btnRem);
-        panel.add(buttons, BorderLayout.SOUTH);
-
-        return panel;
+        }
+        if (mainFrame != null) {
+            ItemForgeController controller = new ItemForgeController();
+            controller.setMainFrame(mainFrame);
+            return controller;
+        }
+        return null;
     }
 
     private ForgeItem getFormData() {
         ForgeItem item = new ForgeItem();
-        try {
-            item.setId(Integer.parseInt(txtId.getText()));
-        } catch (NumberFormatException e) {
-            item.setId(0);
-        }
+        try { item.setId(Integer.parseInt(txtId.getText())); } catch (Exception e) { item.setId(0); }
         item.setName(txtName.getText());
         item.setAdditionalName(txtAddName.getText());
-        
-        // Capture Description and sanitize newlines
-        String rawDesc = txtDescription.getText();
-        if (rawDesc != null) {
-            item.setDescription(rawDesc.replace("\n", "\\n"));
-        } else {
-            item.setDescription("");
-        }
-
-        String type = (String) cbType.getSelectedItem();
-        item.setType(type);
+        item.setDescription(txtDesc.getText());
+        item.setType((String) cbType.getSelectedItem());
+        item.setVisualTemplate(txtVisualTemplate.getText());
         item.setIcon(txtIcon.getText());
-        
-        // Handle Visual Template hint
-        String visualTemplate = txtVisualTemplate.getText();
-        if (VISUAL_TEMPLATE_HINT.equals(visualTemplate)) {
-            item.setVisualTemplate("");
-        } else {
-            item.setVisualTemplate(visualTemplate);
-        }
-
+        item.setBodyPart((String) cbBodyPart.getSelectedItem());
         item.setMaterial((String) cbMaterial.getSelectedItem());
-        item.setCrystalType((String) cbCrystalType.getSelectedItem());
-        
-        try {
-            item.setWeight(Integer.parseInt(txtWeight.getText()));
-        } catch (NumberFormatException e) {
-            item.setWeight(0);
-        }
-        
-        try {
-            item.setPrice(Long.parseLong(txtPrice.getText()));
-        } catch (NumberFormatException e) {
-            item.setPrice(0);
-        }
-        
-        // Dynamic Data Gathering
-        if ("Weapon".equals(type)) {
-            item.setBodyPart((String) cbWeaponBodyPart.getSelectedItem());
-            try {
-                item.setSoulshotCount(Integer.parseInt(txtSoulshotCount.getText()));
-            } catch (NumberFormatException e) { item.setSoulshotCount(0); }
-            try {
-                item.setSpiritshotCount(Integer.parseInt(txtSpiritshotCount.getText()));
-            } catch (NumberFormatException e) { item.setSpiritshotCount(0); }
-            try {
-                item.setRandomDamage(Integer.parseInt(txtRandomDamage.getText()));
-            } catch (NumberFormatException e) { item.setRandomDamage(0); }
-            try {
-                item.setMpConsume(Integer.parseInt(txtMpConsume.getText()));
-            } catch (NumberFormatException e) { item.setMpConsume(0); }
-            item.setMagicWeapon(chkIsMagicWeapon.isSelected());
-        } else if ("Armor".equals(type)) {
-            item.setBodyPart((String) cbArmorBodyPart.getSelectedItem());
-            try {
-                item.setDamageReduction(Integer.parseInt(txtDamageReduction.getText()));
-            } catch (NumberFormatException e) { item.setDamageReduction(0); }
-        } else if ("EtcItem".equals(type)) {
-            item.setBodyPart("none");
-            item.setEtcItemType((String) cbEtcItemType.getSelectedItem());
-            item.setStackable(chkStackable.isSelected());
-            item.setQuestItem(chkQuestItem.isSelected());
-            item.setImmediateEffect(chkImmediateEffect.isSelected());
-        }
-
-        Map<String, Double> stats = new HashMap<>();
-        for (int i = 0; i < statsModel.getRowCount(); i++) {
-            String statName = (String) statsModel.getValueAt(i, 0);
-            String statValueStr = (String) statsModel.getValueAt(i, 1);
-            if (statName != null && !statName.isEmpty() && statValueStr != null && !statValueStr.isEmpty()) {
-                try {
-                    stats.put(statName, Double.parseDouble(statValueStr));
-                } catch (NumberFormatException e) {
-                    // Ignore invalid numbers
-                }
-            }
-        }
-        item.setStats(stats);
-
+        item.setCrystalType((String) cbCrystal.getSelectedItem());
+        try { item.setWeight(Integer.parseInt(txtWeight.getText())); } catch (Exception e) {}
+        try { item.setPrice(Long.parseLong(txtPrice.getText())); } catch (Exception e) {}
+        try { item.setSoulshotCount(Integer.parseInt(txtSoulshot.getText())); } catch (Exception e) {}
+        try { item.setSpiritshotCount(Integer.parseInt(txtSpiritshot.getText())); } catch (Exception e) {}
+        try { item.setMpConsume(Integer.parseInt(txtMpConsume.getText())); } catch (Exception e) {}
         return item;
+    }
+
+    private void setFormData(ForgeItem item) {
+        txtId.setText(String.valueOf(item.getId()));
+        txtName.setText(item.getName());
+        txtAddName.setText(item.getAdditionalName());
+        txtDesc.setText(item.getDescription());
+        txtIcon.setText(item.getIcon());
+        if (item.getVisualTemplate() == null || item.getVisualTemplate().isEmpty()) {
+            txtVisualTemplate.setText(String.valueOf(item.getId()));
+        } else {
+            txtVisualTemplate.setText(item.getVisualTemplate());
+        }
+        if (item.getType() != null) cbType.setSelectedItem(item.getType());
+        updateFieldVisibility();
+        if (item.getBodyPart() != null) cbBodyPart.setSelectedItem(item.getBodyPart());
+        if (item.getMaterial() != null) cbMaterial.setSelectedItem(item.getMaterial());
+        if (item.getCrystalType() != null) cbCrystal.setSelectedItem(item.getCrystalType());
+        txtWeight.setText(String.valueOf(item.getWeight()));
+        txtPrice.setText(String.valueOf(item.getPrice()));
+        txtSoulshot.setText(String.valueOf(item.getSoulshotCount()));
+        txtSpiritshot.setText(String.valueOf(item.getSpiritshotCount()));
+        txtMpConsume.setText(String.valueOf(item.getMpConsume()));
     }
 }

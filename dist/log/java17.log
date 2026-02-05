@@ -1,15 +1,12 @@
-2026.02.04 09:26:09,448	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 09:26:09,513	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 09:26:09,536	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 09:26:09,732	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 09:26:09,733	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 09:26:10,375	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.04 09:27:39,782	INFO	70	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 2 sec
-2026.02.04 09:28:03,271	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.04 09:28:03,273	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.04 09:28:03,285	INFO	70	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.04 09:28:03,377	INFO	70	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.04 09:28:03,377	INFO	70	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.04 09:28:03,384	INFO	70	org.l2jmobius.L2ClientDat	Error while parsing variable NAME[effB] TYPE[UNICODE] in file NAME[weapongrp.dat]! Parsed data: 	effB=
-2026.02.04 09:28:03,389	INFO	70	org.l2jmobius.L2ClientDat	Unpacked not full 20882/5030807 diff: 5009912
-2026.02.04 09:28:03,414	INFO	70	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 13:36:30,073	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 13:36:30,149	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 13:36:30,178	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 13:36:30,465	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 13:36:30,466	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 13:36:31,150	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 13:36:50,896	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
+2026.02.05 13:36:53,076	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat
+2026.02.05 13:40:01,970	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 57
+2026.02.05 13:40:03,620	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 57 in etcitemgrp.dat
+2026.02.05 13:40:12,430	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
+2026.02.05 13:40:14,087	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat
