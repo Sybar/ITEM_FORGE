@@ -1,16 +1,19 @@
-2026.02.05 18:25:27,570	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 18:25:29,650	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 18:26:42,272	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 18:26:44,030	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 18:30:33,414	INFO	44	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 18:30:33,416	INFO	44	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 18:30:33,456	INFO	66	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 18:30:33,612	INFO	66	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 18:30:33,613	INFO	66	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 18:30:33,767	INFO	66	org.l2jmobius.L2ClientDat	Completed.
-2026.02.05 18:31:08,529	INFO	44	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 18:31:08,530	INFO	44	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 18:31:08,549	INFO	66	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 18:31:08,730	INFO	66	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 18:31:08,730	INFO	66	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 18:31:08,864	INFO	66	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 19:28:18,968	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:29:15,143	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:29:15,688	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 19:29:15,691	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 19:29:16,019	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 19:29:52,612	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:29:55,035	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 19:30:14,527	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:30:14,871	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 19:30:14,873	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 19:30:15,174	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 19:30:19,633	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:30:20,623	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 19:30:28,953	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:30:29,764	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 19:30:45,777	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:30:46,569	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 20:40:51,636	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 20:40:53,335	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt

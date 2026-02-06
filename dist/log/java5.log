@@ -1,4 +1,2 @@
-2026.02.05 18:18:25,656	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 18:18:28,004	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 18:20:48,313	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 5 sec
-2026.02.05 18:20:50,592	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
+2026.02.05 19:01:03,397	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 19:01:05,849	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt

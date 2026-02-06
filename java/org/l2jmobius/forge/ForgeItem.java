@@ -7,10 +7,11 @@ public class ForgeItem {
     private int id;
     private String name;
     private String additionalName;
-    private String description = ""; // Initialize to empty string
-    private String type; // Weapon, Armor, EtcItem
+    private String description = "";
+    private String type;
     private String icon;
-    private String visualTemplate; // ID of item to copy visuals from
+    private String iconPanel; // Added
+    private String visualTemplate;
 
     // Server Specs
     private String bodyPart;
@@ -18,7 +19,7 @@ public class ForgeItem {
     private String crystalType;
     private int weight;
     private long price;
-    
+
     // Weapon Specs
     private int soulshotCount;
     private int spiritshotCount;
@@ -27,205 +28,89 @@ public class ForgeItem {
     private int mpConsume;
 
     // Armor Specs
-    private int damageReduction; // Just a placeholder for now
+    private int damageReduction;
 
     // EtcItem Specs
     private boolean isStackable;
     private boolean isQuestItem;
     private boolean isImmediateEffect;
-    private String etcItemType; // Potion, Scroll, etc.
+    private String etcItemType;
 
-    // Stats: Stat Name -> Value
     private Map<String, Double> stats = new HashMap<>();
 
     public ForgeItem() {
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public String getAdditionalName() { return additionalName; }
+    public void setAdditionalName(String additionalName) { this.additionalName = additionalName; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getAdditionalName() {
-        return additionalName;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public void setAdditionalName(String additionalName) {
-        this.additionalName = additionalName;
-    }
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getIconPanel() { return iconPanel; }
+    public void setIconPanel(String iconPanel) { this.iconPanel = iconPanel; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getVisualTemplate() { return visualTemplate; }
+    public void setVisualTemplate(String visualTemplate) { this.visualTemplate = visualTemplate; }
 
-    public String getType() {
-        return type;
-    }
+    public String getBodyPart() { return bodyPart; }
+    public void setBodyPart(String bodyPart) { this.bodyPart = bodyPart; }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public String getMaterial() { return material; }
+    public void setMaterial(String material) { this.material = material; }
 
-    public String getIcon() {
-        return icon;
-    }
+    public String getCrystalType() { return crystalType; }
+    public void setCrystalType(String crystalType) { this.crystalType = crystalType; }
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
+    public int getWeight() { return weight; }
+    public void setWeight(int weight) { this.weight = weight; }
 
-    public String getVisualTemplate() {
-        return visualTemplate;
-    }
+    public long getPrice() { return price; }
+    public void setPrice(long price) { this.price = price; }
 
-    public void setVisualTemplate(String visualTemplate) {
-        this.visualTemplate = visualTemplate;
-    }
+    public int getSoulshotCount() { return soulshotCount; }
+    public void setSoulshotCount(int soulshotCount) { this.soulshotCount = soulshotCount; }
 
-    public String getBodyPart() {
-        return bodyPart;
-    }
+    public int getSpiritshotCount() { return spiritshotCount; }
+    public void setSpiritshotCount(int spiritshotCount) { this.spiritshotCount = spiritshotCount; }
 
-    public void setBodyPart(String bodyPart) {
-        this.bodyPart = bodyPart;
-    }
+    public int getRandomDamage() { return randomDamage; }
+    public void setRandomDamage(int randomDamage) { this.randomDamage = randomDamage; }
 
-    public String getMaterial() {
-        return material;
-    }
+    public boolean isMagicWeapon() { return isMagicWeapon; }
+    public void setMagicWeapon(boolean magicWeapon) { isMagicWeapon = magicWeapon; }
 
-    public void setMaterial(String material) {
-        this.material = material;
-    }
+    public int getMpConsume() { return mpConsume; }
+    public void setMpConsume(int mpConsume) { this.mpConsume = mpConsume; }
 
-    public String getCrystalType() {
-        return crystalType;
-    }
+    public int getDamageReduction() { return damageReduction; }
+    public void setDamageReduction(int damageReduction) { this.damageReduction = damageReduction; }
 
-    public void setCrystalType(String crystalType) {
-        this.crystalType = crystalType;
-    }
+    public boolean isStackable() { return isStackable; }
+    public void setStackable(boolean stackable) { isStackable = stackable; }
 
-    public int getWeight() {
-        return weight;
-    }
+    public boolean isQuestItem() { return isQuestItem; }
+    public void setQuestItem(boolean questItem) { isQuestItem = questItem; }
 
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
+    public boolean isImmediateEffect() { return isImmediateEffect; }
+    public void setImmediateEffect(boolean immediateEffect) { isImmediateEffect = immediateEffect; }
 
-    public long getPrice() {
-        return price;
-    }
+    public String getEtcItemType() { return etcItemType; }
+    public void setEtcItemType(String etcItemType) { this.etcItemType = etcItemType; }
 
-    public void setPrice(long price) {
-        this.price = price;
-    }
-
-    public int getSoulshotCount() {
-        return soulshotCount;
-    }
-
-    public void setSoulshotCount(int soulshotCount) {
-        this.soulshotCount = soulshotCount;
-    }
-
-    public int getSpiritshotCount() {
-        return spiritshotCount;
-    }
-
-    public void setSpiritshotCount(int spiritshotCount) {
-        this.spiritshotCount = spiritshotCount;
-    }
-
-    public int getRandomDamage() {
-        return randomDamage;
-    }
-
-    public void setRandomDamage(int randomDamage) {
-        this.randomDamage = randomDamage;
-    }
-
-    public boolean isMagicWeapon() {
-        return isMagicWeapon;
-    }
-
-    public void setMagicWeapon(boolean magicWeapon) {
-        isMagicWeapon = magicWeapon;
-    }
-
-    public int getMpConsume() {
-        return mpConsume;
-    }
-
-    public void setMpConsume(int mpConsume) {
-        this.mpConsume = mpConsume;
-    }
-
-    public int getDamageReduction() {
-        return damageReduction;
-    }
-
-    public void setDamageReduction(int damageReduction) {
-        this.damageReduction = damageReduction;
-    }
-
-    public boolean isStackable() {
-        return isStackable;
-    }
-
-    public void setStackable(boolean stackable) {
-        isStackable = stackable;
-    }
-
-    public boolean isQuestItem() {
-        return isQuestItem;
-    }
-
-    public void setQuestItem(boolean questItem) {
-        isQuestItem = questItem;
-    }
-
-    public boolean isImmediateEffect() {
-        return isImmediateEffect;
-    }
-
-    public void setImmediateEffect(boolean immediateEffect) {
-        isImmediateEffect = immediateEffect;
-    }
-
-    public String getEtcItemType() {
-        return etcItemType;
-    }
-
-    public void setEtcItemType(String etcItemType) {
-        this.etcItemType = etcItemType;
-    }
-
-    public Map<String, Double> getStats() {
-        return stats;
-    }
-
-    public void setStats(Map<String, Double> stats) {
-        this.stats = stats;
-    }
-    
-    public void addStat(String stat, Double value) {
-        this.stats.put(stat, value);
-    }
+    public Map<String, Double> getStats() { return stats; }
+    public void setStats(Map<String, Double> stats) { this.stats = stats; }
+    public void addStat(String stat, Double value) { this.stats.put(stat, value); }
 }

@@ -1,7 +1,2 @@
-2026.02.05 15:17:37,357	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
-2026.02.05 15:17:38,512	WARNING	52	org.l2jmobius.forge.ItemForgeController	Item ID 40900 not found in itemname-e.dat
-2026.02.05 15:18:16,521	INFO	52	org.l2jmobius.forge.ItemForgeController	Starting item creation for ID: 40900
-2026.02.05 15:18:21,365	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 15:18:23,489	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 15:18:35,528	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
-2026.02.05 15:18:37,132	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat
+2026.02.05 18:24:05,691	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
+2026.02.05 18:24:07,872	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec

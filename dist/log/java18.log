@@ -1,20 +1,8 @@
-2026.02.05 13:32:08,276	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 13:32:08,351	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 13:32:08,379	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 13:32:08,667	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 13:32:08,669	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 13:32:09,282	INFO	69	org.l2jmobius.L2ClientDat	Completed.
-2026.02.05 13:32:17,117	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
-2026.02.05 13:32:19,152	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat
-2026.02.05 13:34:20,579	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
-2026.02.05 13:34:22,222	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat
-2026.02.05 13:34:31,308	INFO	52	org.l2jmobius.forge.ItemForgeController	Starting item creation for ID: 40900
-2026.02.05 13:34:36,239	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 4 sec
-2026.02.05 13:34:36,730	INFO	52	org.l2jmobius.forge.ItemForgeController	Exported etcitemgrp.txt
-2026.02.05 13:35:03,054	INFO	70	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 13:35:07,632	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 13:35:07,632	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
-2026.02.05 13:35:07,664	INFO	70	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 13:35:07,846	INFO	70	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
-2026.02.05 13:35:07,847	INFO	70	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 13:35:07,993	INFO	70	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 14:02:16,202	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 14:02:16,267	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 14:02:16,284	INFO	69	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 14:02:16,553	INFO	69	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 14:02:16,554	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 14:02:17,162	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 14:02:44,180	INFO	52	org.l2jmobius.forge.ItemForgeController	Attempting to load Item ID: 40900
+2026.02.05 14:02:46,103	INFO	52	org.l2jmobius.forge.ItemForgeController	Found Item 40900 in etcitemgrp.dat

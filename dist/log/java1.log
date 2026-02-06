@@ -1,14 +1,40 @@
-2026.02.05 18:45:53,414	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 4 sec
-2026.02.05 18:45:55,577	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 18:47:04,095	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
-2026.02.05 18:47:08,574	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
-2026.02.05 18:47:08,575	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
-2026.02.05 18:47:10,234	INFO	52	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
-2026.02.05 18:47:15,199	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
-2026.02.05 18:55:15,324	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
-2026.02.05 18:59:23,725	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 18:59:23,726	INFO	52	org.l2jmobius.L2ClientDat	Open file: weapongrp.dat
-2026.02.05 18:59:23,801	INFO	69	org.l2jmobius.L2ClientDat	File weapongrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 18:59:23,940	INFO	69	org.l2jmobius.L2ClientDat	Decrypt weapongrp.dat file successfully by v413_encdec decrypter.
-2026.02.05 18:59:23,941	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 18:59:24,173	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 20:57:23,931	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 20:57:26,564	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 20:57:56,766	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 20:57:57,300	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 20:57:57,302	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 20:57:57,664	INFO	52	org.l2jmobius.L2ClientDat	buff == null.
+2026.02.05 20:58:01,816	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: itemname-e.txt
+2026.02.05 20:58:02,853	INFO	52	org.l2jmobius.forge.ItemForgeController	Reading from working file: etcitemgrp.txt
+2026.02.05 20:59:31,677	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 20:59:31,678	INFO	52	org.l2jmobius.L2ClientDat	Open file: etcitemgrp.dat
+2026.02.05 20:59:31,730	INFO	69	org.l2jmobius.L2ClientDat	File etcitemgrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 20:59:31,799	INFO	69	org.l2jmobius.L2ClientDat	Decrypt etcitemgrp.dat file successfully by v413_encdec decrypter.
+2026.02.05 20:59:31,799	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 20:59:31,972	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 21:01:49,926	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 21:01:49,927	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 21:01:49,950	INFO	79	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 21:01:50,102	INFO	79	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 21:01:50,103	INFO	79	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 21:01:50,588	INFO	79	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 21:02:21,869	INFO	79	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 4 sec
+2026.02.05 21:03:27,921	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 21:03:27,922	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 21:03:27,946	INFO	89	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 21:03:28,118	INFO	89	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 21:03:28,119	INFO	89	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 21:03:28,268	INFO	89	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 21:04:53,821	INFO	90	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
+2026.02.05 21:13:27,573	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 21:13:27,574	INFO	52	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 21:13:27,609	INFO	100	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 21:13:27,782	INFO	100	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 21:13:27,784	INFO	100	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 21:13:28,004	INFO	100	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 21:13:34,402	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 21:13:34,403	INFO	52	org.l2jmobius.L2ClientDat	Open file: etcitemgrp.dat
+2026.02.05 21:13:34,435	INFO	100	org.l2jmobius.L2ClientDat	File etcitemgrp.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 21:13:34,492	INFO	100	org.l2jmobius.L2ClientDat	Decrypt etcitemgrp.dat file successfully by v413_encdec decrypter.
+2026.02.05 21:13:34,492	INFO	100	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 21:13:34,632	INFO	100	org.l2jmobius.L2ClientDat	Completed.

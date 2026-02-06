@@ -37,6 +37,7 @@ public class ItemForgeController {
                 type));
 
         appendSet(sb, "icon", item.getIcon());
+        // icon_panel is excluded from XML
         appendSet(sb, "price", String.valueOf(item.getPrice()));
         appendSet(sb, "weight", String.valueOf(item.getWeight()));
 
@@ -125,9 +126,18 @@ public class ItemForgeController {
         String searchId = "object_id=" + item.getId();
         for (String line : lines) {
             String[] tokens = line.split("\t");
-            if (tokens.length > 2 && tokens[2].trim().equals(searchId)) {
+            if (tokens.length > 2 && getValue(tokens[2]).trim().equals(String.valueOf(item.getId()))) {
                 item.setType(type);
                 item.setVisualTemplate(String.valueOf(item.getId()));
+
+                // Load Icon Panel
+                for(String t : tokens) {
+                    if (t.contains("icon_panel")) {
+                        String val = cleanStr(t);
+                        if (!val.equals("icon_panel")) item.setIconPanel(val);
+                    }
+                }
+
                 if (type.equals("Weapon")) parseWeaponStats(tokens, item);
                 else if (type.equals("Armor")) parseArmorStats(tokens, item);
                 else parseEtcItemStats(tokens, item);
@@ -156,26 +166,27 @@ public class ItemForgeController {
         for(String t : tokens) {
             if (t.contains("icon")) {
                 String clean = cleanStr(t);
-                if(!clean.isEmpty() && !clean.equals("icon")) { item.setIcon(clean); break; }
+                if(!clean.isEmpty() && !clean.equals("icon") && !t.contains("icon_panel")) { item.setIcon(clean); break; }
             }
         }
     }
 
     private void parseEtcItemStats(String[] tokens, ForgeItem item) {
-        if (tokens.length > 5) item.setWeight(safeParseInt(tokens[5]));
-        if (tokens.length > 7) item.setMaterial(getMaterialName(safeParseInt(tokens[7])));
-        if (tokens.length > 8) item.setCrystalType(getCrystalName(safeParseInt(tokens[8])));
+        if (tokens.length > 20) item.setWeight(safeParseInt(tokens[20]));
+        if (tokens.length > 21) item.setMaterial(getMaterialName(safeParseInt(tokens[21])));
+        if (tokens.length > 33) item.setCrystalType(getCrystalName(safeParseInt(tokens[33])));
+
         for(String t : tokens) {
             if (t.contains("icon")) {
                 String clean = cleanStr(t);
-                if(!clean.isEmpty() && !clean.equals("icon")) { item.setIcon(clean); break; }
+                if(!clean.isEmpty() && !clean.equals("icon") && !t.contains("icon_panel")) { item.setIcon(clean); break; }
             }
         }
     }
 
     private String cleanStr(String val) {
         if (val == null) return "";
-        val = val.replace("icon=", "");
+        val = val.replace("icon=", "").replace("icon_panel=", "");
         val = val.replaceAll("[\\[\\]\\{\\}]", "");
         if (val.contains(";")) {
             val = val.split(";")[0];
@@ -210,17 +221,11 @@ public class ItemForgeController {
         }
     }
 
-    // --- SMART READ LOGIC (Prioritizes TXT) ---
+    // --- SMART READ LOGIC ---
     private List<String> readDatFile(File systemFolder, String fileName) {
-        File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
-        if (txtFile.exists()) {
-            try {
-                LOGGER.info("Reading from working file: " + txtFile.getName());
-                return Files.readAllLines(txtFile.toPath(), StandardCharsets.UTF_8);
-            } catch (Exception e) {}
-        }
-
+        // 1. Initialize DAT Context (Critical for SaveDat)
         File datFile = new File(systemFolder, fileName);
+        List<String> datLines = new ArrayList<>();
         try {
             org.l2jmobius.actions.ActionTask dummyTask = new org.l2jmobius.actions.ActionTask(null) {
                 @Override public Void doInBackground() { return null; }
@@ -229,11 +234,23 @@ public class ItemForgeController {
                 @Override public void propertyChange(java.beans.PropertyChangeEvent evt) {}
             };
             String text = OpenDat.start(dummyTask, 100.0, ConfigWindow.CURRENT_CHRONICLE, datFile, true);
-            if (text == null) return null;
-            List<String> lines = new ArrayList<>();
-            for(String s : text.split("\r\n|\n")) lines.add(s);
-            return lines;
-        } catch (Exception e) { return null; }
+            if (text != null) {
+                for(String s : text.split("\r\n|\n")) datLines.add(s);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error initializing DAT context: " + e.getMessage());
+        }
+
+        // 2. Use TXT if available
+        File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
+        if (txtFile.exists()) {
+            try {
+                LOGGER.info("Reading from working file: " + txtFile.getName());
+                return Files.readAllLines(txtFile.toPath(), StandardCharsets.UTF_8);
+            } catch (Exception e) {}
+        }
+
+        return datLines.isEmpty() ? null : datLines;
     }
 
     private boolean processDatFile(File systemFolder, String fileName, ForgeItem item, boolean isItemName) {
@@ -241,20 +258,15 @@ public class ItemForgeController {
         if (lines == null) return false;
         List<String> newLines = generateUpdatedContent(lines, item, isItemName);
 
-        // 1. SYNC TXT FILE
         try {
             File txtFile = new File(systemFolder, fileName.replace(".dat", ".txt"));
             Files.write(txtFile.toPath(), newLines, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            LOGGER.warning("Failed to sync TXT file: " + e.getMessage());
-        }
+        } catch (Exception e) {}
 
-        // 2. Save to DAT
         File datFile = new File(systemFolder, fileName);
         ConfigWindow.LAST_FILE_SELECTED = datFile.getAbsolutePath();
         _mainFrame.setEditorText(String.join("\r\n", newLines));
         new SaveDat(_mainFrame, datFile, ConfigWindow.CURRENT_CHRONICLE).doInBackground();
-
         return true;
     }
 
@@ -270,40 +282,32 @@ public class ItemForgeController {
         } catch (Exception e) { return false; }
     }
 
-    // --- UPDATED GENERATOR (REPLACE IN-PLACE) ---
+    // --- UPDATED GENERATOR (WITH IN-PLACE REPLACEMENT) ---
     private List<String> generateUpdatedContent(List<String> lines, ForgeItem item, boolean isItemName) {
         List<String> newLines = new ArrayList<>();
 
         if (isItemName) {
-            // --- 1. HANDLE ITEMNAME-E.DAT ---
             String format = "item_name_begin\tid=%d\tname=[%s]\tadditionalname=[%s]\tdescription=[%s]\tpopup=-1\tsupercnt0=0\tsetid_1={}\tset_bonus_desc=[]\tsupercnt1=0\tset_extra_id={}\tset_extra_desc=[]\tunknown={0;0;0;0;0;0;0;0;0}\tspecial_enchant_amount=0\tspecial_enchant_desc=[]\tcolor=1\titem_name_end";
             String newItemLine = String.format(format, item.getId(), item.getName(), item.getAdditionalName() != null ? item.getAdditionalName() : "", item.getDescription() != null ? item.getDescription() : "");
 
             boolean replaced = false;
             String searchId = "id=" + item.getId() + "\t";
-
             for (String line : lines) {
                 if (line.contains(searchId)) {
-                    newLines.add(newItemLine); // Replace existing
-                    replaced = true;
-                } else {
-                    newLines.add(line); // Keep existing
-                }
+                    newLines.add(newItemLine); replaced = true;
+                } else newLines.add(line);
             }
-            if (!replaced) newLines.add(newItemLine); // Append new
+            if (!replaced) newLines.add(newItemLine);
 
         } else {
-            // --- 2. HANDLE GROUP FILES ---
             String templateId = item.getVisualTemplate();
             String templateLine = null;
-            String searchId = "object_id=" + String.valueOf(templateId).trim();
+            String searchId = String.valueOf(templateId).trim();
 
-            // Find Template first (to construct new line)
             for (String line : lines) {
                 String[] t = line.split("\t");
-                if (t.length > 2 && t[2].trim().equals(searchId)) {
-                    templateLine = line;
-                    break;
+                if (t.length > 2 && getValue(t[2]).trim().equals(searchId)) {
+                    templateLine = line; break;
                 }
             }
 
@@ -314,72 +318,81 @@ public class ItemForgeController {
                 }
 
                 if (tokens.length > 18) {
-                    // Update Values
-                    tokens[2] = "object_id=" + item.getId();
+                    tokens[2] = updateToken(tokens[2], String.valueOf(item.getId()));
+
                     if (item.getIcon() != null && !item.getIcon().isEmpty()) {
                         tokens[18] = tokens[18].replaceFirst("icon\\.[\\w_]+", item.getIcon());
                     }
+
+                    if (item.getIconPanel() != null && !item.getIconPanel().isEmpty()) {
+                        for(int i=0; i<tokens.length; i++) {
+                            if (tokens[i].contains("icon_panel")) {
+                                tokens[i] = "icon_panel=[" + item.getIconPanel() + "]";
+                                break;
+                            }
+                        }
+                    }
+
                     String type = item.getType();
                     if ("Weapon".equalsIgnoreCase(type)) {
-                        if (tokens.length > 20) tokens[20] = String.valueOf(item.getWeight());
-                        if (tokens.length > 21) tokens[21] = String.valueOf(getMaterialId(item.getMaterial()));
-                        if (tokens.length > 23) tokens[23] = String.valueOf(getCrystalId(item.getCrystalType()));
-                        if (tokens.length > 32) tokens[32] = String.valueOf(item.getSoulshotCount());
-                        if (tokens.length > 33) tokens[33] = String.valueOf(item.getSpiritshotCount());
-                        if (tokens.length > 44) tokens[44] = String.valueOf(item.getMpConsume());
+                        if (tokens.length > 20) tokens[20] = updateToken(tokens[20], String.valueOf(item.getWeight()));
+                        if (tokens.length > 21) tokens[21] = updateToken(tokens[21], String.valueOf(getMaterialId(item.getMaterial())));
+                        if (tokens.length > 23) tokens[23] = updateToken(tokens[23], String.valueOf(getCrystalId(item.getCrystalType())));
+                        if (tokens.length > 32) tokens[32] = updateToken(tokens[32], String.valueOf(item.getSoulshotCount()));
+                        if (tokens.length > 33) tokens[33] = updateToken(tokens[33], String.valueOf(item.getSpiritshotCount()));
+                        if (tokens.length > 44) tokens[44] = updateToken(tokens[44], String.valueOf(item.getMpConsume()));
                     } else if ("Armor".equalsIgnoreCase(type)) {
-                        if (tokens.length > 4) tokens[4] = String.valueOf(getBodyPartId(item.getBodyPart()));
-                        if (tokens.length > 16) tokens[16] = String.valueOf(item.getWeight());
-                        if (tokens.length > 17) tokens[17] = String.valueOf(getMaterialId(item.getMaterial()));
-                        if (tokens.length > 18) tokens[18] = String.valueOf(getCrystalId(item.getCrystalType()));
+                        if (tokens.length > 4) tokens[4] = updateToken(tokens[4], String.valueOf(getBodyPartId(item.getBodyPart())));
+                        if (tokens.length > 16) tokens[16] = updateToken(tokens[16], String.valueOf(item.getWeight()));
+                        if (tokens.length > 17) tokens[17] = updateToken(tokens[17], String.valueOf(getMaterialId(item.getMaterial())));
+                        if (tokens.length > 18) tokens[18] = updateToken(tokens[18], String.valueOf(getCrystalId(item.getCrystalType())));
                     } else {
-                        if (tokens.length > 5) tokens[5] = String.valueOf(item.getWeight());
-                        if (tokens.length > 7) tokens[7] = String.valueOf(getMaterialId(item.getMaterial()));
-                        if (tokens.length > 8) tokens[8] = String.valueOf(getCrystalId(item.getCrystalType()));
+                        if (tokens.length > 20) tokens[20] = updateToken(tokens[20], String.valueOf(item.getWeight()));
+                        if (tokens.length > 21) tokens[21] = updateToken(tokens[21], String.valueOf(getMaterialId(item.getMaterial())));
+                        if (tokens.length > 33) tokens[33] = updateToken(tokens[33], String.valueOf(getCrystalId(item.getCrystalType())));
                     }
                     String newLine = String.join("\t", tokens);
 
-                    // Rebuild File with In-Place Replacement
+                    // --- REPLACEMENT LOGIC (RESTORED) ---
                     boolean replaced = false;
-                    String targetId = "object_id=" + item.getId();
+                    String targetId = String.valueOf(item.getId());
 
                     for (String line : lines) {
                         String[] t = line.split("\t");
-                        if (t.length > 2 && t[2].trim().equals(targetId)) {
-                            newLines.add(newLine); // Replace
-                            replaced = true;
-                        } else {
-                            newLines.add(line); // Keep
-                        }
+                        if (t.length > 2 && getValue(t[2]).trim().equals(targetId)) {
+                            newLines.add(newLine); replaced = true;
+                        } else newLines.add(line);
                     }
-                    if (!replaced) newLines.add(newLine); // Append
+                    if (!replaced) newLines.add(newLine);
 
-                } else newLines.addAll(lines); // Malformed template
-            } else newLines.addAll(lines); // Template not found
+                } else newLines.addAll(lines);
+            } else newLines.addAll(lines);
         }
         return newLines;
     }
 
     // --- HELPERS ---
+    private String getValue(String token) {
+        if (token.contains("=")) return token.split("=")[1];
+        return token;
+    }
+
+    private String updateToken(String oldToken, String newValue) {
+        if (oldToken.contains("=")) {
+            String key = oldToken.split("=")[0];
+            return key + "=" + newValue;
+        }
+        return newValue;
+    }
+
     private void showMessage(String msg) { javax.swing.JOptionPane.showMessageDialog(_mainFrame, msg, "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE); }
-    private int safeParseInt(String val) { try { return Integer.parseInt(val.trim()); } catch (Exception e) { return 0; } }
+    private int safeParseInt(String val) { try { return Integer.parseInt(getValue(val).trim()); } catch (Exception e) { return 0; } }
     private String extractTagValue(String line, String tag) { Pattern p = Pattern.compile(tag + "=\\[(.*?)\\]"); Matcher m = p.matcher(line); return m.find() ? m.group(1) : ""; }
 
-    // Reverse Maps (Name -> ID)
-    private int getMaterialId(String name) {
-        String[] m = {"steel","fine_steel","blood_steel","bronze","silver","gold","mithril","ori_harukon","paper","wood","cloth","leather","bone","horn","damascus","adamanta","chrysolite","crystal","liquid","scale_of_dragon","dyestuff","cobweb","seed"};
-        for(int i=0;i<m.length;i++) if(m[i].equalsIgnoreCase(name)) return i; return 0;
-    }
-    private int getCrystalId(String name) {
-        String[] c = {"none","d","c","b","a","s","s80","s84"};
-        for(int i=0;i<c.length;i++) if(c[i].equalsIgnoreCase(name)) return i; return 0;
-    }
-    private int getBodyPartId(String name) {
-        String[] b = {"underwear","rear;lear","head","hair","neck","gloves","chest","legs","feet","back","lrhand","onepiece","rhand"};
-        for(int i=0;i<b.length;i++) if(b[i].equalsIgnoreCase(name)) return i; return 0;
-    }
+    private int getMaterialId(String name) { String[] m = {"steel","fine_steel","blood_steel","bronze","silver","gold","mithril","ori_harukon","paper","wood","cloth","leather","bone","horn","damascus","adamanta","chrysolite","crystal","liquid","scale_of_dragon","dyestuff","cobweb","seed"}; for(int i=0;i<m.length;i++) if(m[i].equalsIgnoreCase(name)) return i; return 0; }
+    private int getCrystalId(String name) { String[] c = {"none","d","c","b","a","s","s80","s84"}; for(int i=0;i<c.length;i++) if(c[i].equalsIgnoreCase(name)) return i; return 0; }
+    private int getBodyPartId(String name) { String[] b = {"underwear","rear;lear","head","hair","neck","gloves","chest","legs","feet","back","lrhand","onepiece","rhand"}; for(int i=0;i<b.length;i++) if(b[i].equalsIgnoreCase(name)) return i; return 0; }
 
-    // Forward Maps (ID -> Name)
     private String getMaterialName(int id) { String[] m = {"steel","fine_steel","blood_steel","bronze","silver","gold","mithril","ori_harukon","paper","wood","cloth","leather","bone","horn","damascus","adamanta","chrysolite","crystal","liquid","scale_of_dragon","dyestuff","cobweb","seed"}; return (id>=0 && id<m.length) ? m[id] : "steel"; }
     private String getCrystalName(int id) { String[] c = {"none","d","c","b","a","s","s80","s84"}; return (id>=0 && id<c.length) ? c[id] : "none"; }
     private String getBodyPartName(int id) { String[] b = {"underwear","rear;lear","head","hair","neck","gloves","chest","legs","feet","back","lrhand","onepiece","rhand"}; return (id>=0 && id<b.length) ? b[id] : "none"; }

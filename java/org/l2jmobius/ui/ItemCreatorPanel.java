@@ -9,6 +9,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -40,6 +42,7 @@ public class ItemCreatorPanel extends JPanel {
     private JComboBox<String> cbType;
     private JTextField txtVisualTemplate;
     private JTextField txtIcon;
+    private JTextField txtIconPanel; // Added
 
     // Server Specs
     private JComboBox<String> cbBodyPart;
@@ -59,18 +62,20 @@ public class ItemCreatorPanel extends JPanel {
     // XML Output
     private JTextArea txtServerXml;
 
+    // Layout
+    private JSplitPane splitPane;
+
     // Persistence
     private static File lastIconDir = new File(".");
     private static final String PREF_WIDTH = "forge_width";
     private static final String PREF_HEIGHT = "forge_height";
+    private static final String PREF_DIVIDER = "forge_divider";
 
     public ItemCreatorPanel() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // ---------------------------------------------------------
-        // 0. WINDOW SIZE PERSISTENCE
-        // ---------------------------------------------------------
+        // 0. WINDOW PERSISTENCE (Size & Divider)
         Preferences prefs = Preferences.userNodeForPackage(ItemCreatorPanel.class);
         int savedWidth = prefs.getInt(PREF_WIDTH, 950);
         int savedHeight = prefs.getInt(PREF_HEIGHT, 700);
@@ -80,20 +85,20 @@ public class ItemCreatorPanel extends JPanel {
             if ((e.getChangeFlags() & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0 && isDisplayable()) {
                 Window window = SwingUtilities.getWindowAncestor(this);
                 if (window != null) {
+                    if (window.getWidth() < savedWidth || window.getHeight() < savedHeight) {
+                        window.setSize(savedWidth, savedHeight);
+                    }
                     window.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowClosing(WindowEvent we) {
-                            prefs.putInt(PREF_WIDTH, window.getWidth());
-                            prefs.putInt(PREF_HEIGHT, window.getHeight());
-                        }
+                        @Override public void windowClosing(WindowEvent we) { saveWindowPreferences(prefs, window); }
+                    });
+                    window.addComponentListener(new ComponentAdapter() {
+                        @Override public void componentResized(ComponentEvent ce) { saveWindowPreferences(prefs, window); }
                     });
                 }
             }
         });
 
-        // ---------------------------------------------------------
-        // 1. HEADER & LOAD SECTION
-        // ---------------------------------------------------------
+        // 1. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         JLabel lblTitle = new JLabel("Item Forge", JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
@@ -101,7 +106,6 @@ public class ItemCreatorPanel extends JPanel {
 
         JPanel loadPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         loadPanel.setBorder(BorderFactory.createTitledBorder("Load Existing"));
-
         JTextField txtLoadId = new JTextField(6);
         JButton btnLoad = new JButton("Load ID");
 
@@ -124,25 +128,18 @@ public class ItemCreatorPanel extends JPanel {
             }
         });
 
-        // --- RESET BUTTON ---
         JButton btnReset = new JButton("Reset View");
-        btnReset.addActionListener(e -> {
-            txtLoadId.setText("");
-            resetForm();
-        });
+        btnReset.addActionListener(e -> { txtLoadId.setText(""); resetForm(); });
 
         loadPanel.add(new JLabel("ID:"));
         loadPanel.add(txtLoadId);
         loadPanel.add(btnLoad);
-        loadPanel.add(btnReset); // Added
-
+        loadPanel.add(btnReset);
         headerPanel.add(loadPanel, BorderLayout.SOUTH);
         add(headerPanel, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------
         // 2. MAIN SPLIT PANE
-        // ---------------------------------------------------------
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setResizeWeight(0.6);
 
         // LEFT: Form
@@ -197,21 +194,22 @@ public class ItemCreatorPanel extends JPanel {
         JPanel pnlIcon = new JPanel(new BorderLayout(5, 0));
         txtIcon = new JTextField(15);
         JButton btnBrowseIcon = new JButton("...");
-        btnBrowseIcon.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser(lastIconDir);
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                lastIconDir = fc.getCurrentDirectory();
-                File selected = fc.getSelectedFile();
-                String fileName = selected.getName();
-                String folderName = selected.getParentFile().getName();
-                int dotIndex = fileName.lastIndexOf('.');
-                if (dotIndex > 0) fileName = fileName.substring(0, dotIndex);
-                txtIcon.setText(folderName + "." + fileName);
-            }
-        });
+        btnBrowseIcon.addActionListener(e -> browseIcon(txtIcon));
         pnlIcon.add(txtIcon, BorderLayout.CENTER);
         pnlIcon.add(btnBrowseIcon, BorderLayout.EAST);
         gbc.gridx = 1; formPanel.add(pnlIcon, gbc);
+
+        // --- ICON PANEL (NEW) ---
+        gbc.gridx = 0; gbc.gridy++;
+        formPanel.add(new JLabel("Icon Panel:"), gbc);
+        JPanel pnlIconPanel = new JPanel(new BorderLayout(5, 0));
+        txtIconPanel = new JTextField(15);
+        JButton btnBrowsePanel = new JButton("...");
+        btnBrowsePanel.setToolTipText("Browse for Icon Panel");
+        btnBrowsePanel.addActionListener(e -> browseIcon(txtIconPanel));
+        pnlIconPanel.add(txtIconPanel, BorderLayout.CENTER);
+        pnlIconPanel.add(btnBrowsePanel, BorderLayout.EAST);
+        gbc.gridx = 1; formPanel.add(pnlIconPanel, gbc);
 
         // --- Column 2 ---
         int col2X = 2;
@@ -271,6 +269,14 @@ public class ItemCreatorPanel extends JPanel {
         splitPane.setLeftComponent(new JScrollPane(formPanel));
         splitPane.setRightComponent(xmlPanel);
 
+        // Divider Restore & Save
+        int savedDivider = prefs.getInt(PREF_DIVIDER, -1);
+        if (savedDivider != -1) SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(savedDivider));
+        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, e -> {
+            Window win = SwingUtilities.getWindowAncestor(this);
+            if (win != null) saveWindowPreferences(prefs, win);
+        });
+
         add(splitPane, BorderLayout.CENTER);
 
         // 3. FOOTER
@@ -299,6 +305,27 @@ public class ItemCreatorPanel extends JPanel {
     }
 
     // --- Helpers ---
+    private void browseIcon(JTextField targetField) {
+        JFileChooser fc = new JFileChooser(lastIconDir);
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            lastIconDir = fc.getCurrentDirectory();
+            File selected = fc.getSelectedFile();
+            String fileName = selected.getName();
+            String folderName = selected.getParentFile().getName();
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex > 0) fileName = fileName.substring(0, dotIndex);
+            targetField.setText(folderName + "." + fileName);
+        }
+    }
+
+    private void saveWindowPreferences(Preferences prefs, Window window) {
+        try {
+            prefs.putInt(PREF_WIDTH, window.getWidth());
+            prefs.putInt(PREF_HEIGHT, window.getHeight());
+            if (splitPane != null) prefs.putInt(PREF_DIVIDER, splitPane.getDividerLocation());
+        } catch (Exception ex) {}
+    }
+
     private void updateFieldVisibility() {
         String type = (String) cbType.getSelectedItem();
         boolean isWeapon = "Weapon".equalsIgnoreCase(type);
@@ -312,31 +339,24 @@ public class ItemCreatorPanel extends JPanel {
         lblMp.setEnabled(isWeapon);
     }
 
-    // --- RESET VIEW FUNCTION ---
     private void resetForm() {
         txtId.setText("");
         txtName.setText("");
         txtAddName.setText("");
         txtDesc.setText("");
-
-        // Reset Combo Boxes
         if (cbType.getItemCount() > 0) cbType.setSelectedIndex(0);
         if (cbBodyPart.getItemCount() > 0) cbBodyPart.setSelectedIndex(0);
         if (cbMaterial.getItemCount() > 0) cbMaterial.setSelectedIndex(0);
         if (cbCrystal.getItemCount() > 0) cbCrystal.setSelectedIndex(0);
-
         txtVisualTemplate.setText("");
         txtIcon.setText("");
-
-        // Reset defaults
+        txtIconPanel.setText(""); // Reset Icon Panel
         txtWeight.setText("1000");
         txtPrice.setText("0");
         txtSoulshot.setText("1");
         txtSpiritshot.setText("1");
         txtMpConsume.setText("0");
-
         txtServerXml.setText("");
-
         updateFieldVisibility();
     }
 
@@ -368,6 +388,7 @@ public class ItemCreatorPanel extends JPanel {
         item.setType((String) cbType.getSelectedItem());
         item.setVisualTemplate(txtVisualTemplate.getText());
         item.setIcon(txtIcon.getText());
+        item.setIconPanel(txtIconPanel.getText()); // Get Icon Panel
         item.setBodyPart((String) cbBodyPart.getSelectedItem());
         item.setMaterial((String) cbMaterial.getSelectedItem());
         item.setCrystalType((String) cbCrystal.getSelectedItem());
@@ -385,6 +406,8 @@ public class ItemCreatorPanel extends JPanel {
         txtAddName.setText(item.getAdditionalName());
         txtDesc.setText(item.getDescription());
         txtIcon.setText(item.getIcon());
+        txtIconPanel.setText(item.getIconPanel()); // Set Icon Panel
+
         if (item.getVisualTemplate() == null || item.getVisualTemplate().isEmpty()) {
             txtVisualTemplate.setText(String.valueOf(item.getId()));
         } else {

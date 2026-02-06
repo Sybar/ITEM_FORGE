@@ -1,6 +1,16 @@
-2026.02.05 18:02:22,524	INFO	52	org.l2jmobius.L2ClientDat	---------------------------------------
-2026.02.05 18:02:22,607	INFO	52	org.l2jmobius.L2ClientDat	Open file: etcitemgrp.dat
-2026.02.05 18:02:22,626	INFO	69	org.l2jmobius.L2ClientDat	File etcitemgrp.dat encrypted. Lineage2Ver413 decrypt ...
-2026.02.05 18:02:22,703	INFO	69	org.l2jmobius.L2ClientDat	Decrypt etcitemgrp.dat file successfully by v413_encdec decrypter.
-2026.02.05 18:02:22,704	INFO	69	org.l2jmobius.L2ClientDat	Read the file structure ...
-2026.02.05 18:02:22,854	INFO	69	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 18:25:27,570	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
+2026.02.05 18:25:29,650	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
+2026.02.05 18:26:42,272	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 3 sec
+2026.02.05 18:26:44,030	INFO	44	org.l2jmobius.L2ClientDat	Packed successfully by v413_encdec encrypter. Elapsed 1 sec
+2026.02.05 18:30:33,414	INFO	44	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 18:30:33,416	INFO	44	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 18:30:33,456	INFO	66	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 18:30:33,612	INFO	66	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 18:30:33,613	INFO	66	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 18:30:33,767	INFO	66	org.l2jmobius.L2ClientDat	Completed.
+2026.02.05 18:31:08,529	INFO	44	org.l2jmobius.L2ClientDat	---------------------------------------
+2026.02.05 18:31:08,530	INFO	44	org.l2jmobius.L2ClientDat	Open file: itemname-e.dat
+2026.02.05 18:31:08,549	INFO	66	org.l2jmobius.L2ClientDat	File itemname-e.dat encrypted. Lineage2Ver413 decrypt ...
+2026.02.05 18:31:08,730	INFO	66	org.l2jmobius.L2ClientDat	Decrypt itemname-e.dat file successfully by v413_encdec decrypter.
+2026.02.05 18:31:08,730	INFO	66	org.l2jmobius.L2ClientDat	Read the file structure ...
+2026.02.05 18:31:08,864	INFO	66	org.l2jmobius.L2ClientDat	Completed.
